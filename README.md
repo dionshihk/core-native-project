@@ -1,6 +1,6 @@
 A lightweight framework based on React Native + Redux + Redux Saga, in strict TypeScript.
 
-##Basic Features:
+## Basic Features:
 
 App are split into __modules__.
 
@@ -10,7 +10,7 @@ No matter sync or async, every action is automatically wrapped as saga generator
 
 To extend module features, modules can also implement its own lifecycle actions, like onEnter/onDestroy/onActive etc.
 
-##Advanced Features
+## Advanced Features
 
 (1) Global error handler
 
@@ -18,7 +18,7 @@ To extend module features, modules can also implement its own lifecycle actions,
 
 (3) Built-in decorator
 
-##Core API:
+## Core API:
 
 - startApp
 
@@ -28,11 +28,11 @@ Bootstrap function, configuring entry component / error handler / log / initiali
 
 Register a module (including lifecycle actions and custom actions).
 
-##Usage:
+## Usage:
 
 (To be done)
 
-##Similar Frameworks
+## Similar Frameworks
 
 We also develop a same (95% similarity) framework for website, using the same tech stack.
 
