@@ -2,9 +2,9 @@ A lightweight framework based on React Native + Redux + Redux Saga, in strict Ty
 
 ## Basic Features:
 
-App are split into __modules__.
+The whole app is split into __modules__, usually by navigation screens.
 
-For each module, it contains the __1 state__ and __some actions__ to handle module business logic.
+For each module, it contains __1 state__ and __some actions__, to handle business logic.
 
 No matter sync or async, every action is automatically wrapped as saga generator.   
 
