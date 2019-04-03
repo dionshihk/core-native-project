@@ -7,7 +7,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/dionshihk/react-native-core-framework"
+    "url": "https://github.com/dionshihk/core-native-framework"
   },
   "scripts": {
     "build": "node node/build.js",
