@@ -1,7 +1,7 @@
 import {applyMiddleware, compose, createStore, Store, StoreEnhancer} from "redux";
 import createSagaMiddleware, {SagaMiddleware} from "redux-saga";
 import {put, takeEvery} from "redux-saga/effects";
-import {EventLogger} from "./EventLogger";
+import {EventLogger, EventLoggerConfig} from "./EventLogger";
 import {ActionHandler, ErrorHandler} from "./module";
 import {Action, ERROR_ACTION_TYPE, errorAction, LOADING_ACTION, rootReducer, State} from "./reducer";
 
@@ -13,7 +13,7 @@ interface App {
     readonly actionHandlers: {[actionType: string]: ActionHandler};
     readonly eventLogger: EventLogger;
     errorHandler: ErrorHandler | null;
-    maskedEventKeywords: RegExp[];
+    eventLoggerConfig: EventLoggerConfig | null;
 }
 
 function composeWithDevTools(enhancer: StoreEnhancer): StoreEnhancer {
@@ -60,7 +60,7 @@ function createApp(): App {
         actionHandlers,
         eventLogger,
         errorHandler: null,
-        maskedEventKeywords: [],
+        eventLoggerConfig: null,
     };
 }
 
