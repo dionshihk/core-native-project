@@ -1,6 +1,8 @@
 A lightweight framework based on React Native + Redux + Redux Saga, in strict TypeScript.
 
 [![Build Status](https://travis-ci.com/dionshihk/core-native-framework.svg?branch=master)](https://travis-ci.com/dionshihk/core-native-framework)
+[![Language grade: JavaScript](https://img.shields.io/lgtm/grade/javascript/g/dionshihk/core-native-project.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/dionshihk/core-native-project/context:javascript)
+[![Total alerts](https://img.shields.io/lgtm/alerts/g/dionshihk/core-native-project.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/dionshihk/core-native-project/alerts/)
 
 ## Basic Features:
 
@@ -38,7 +40,7 @@ Register a module (including lifecycle actions and custom actions).
 
 We also develop a same (90% similarity) framework for website, using the same tech stack.
 
-https://github.com/dionshihk/react-native-core-framework
+https://github.com/neowu/core-fe-project
 
 Our idea is also inspired by many React-based frameworks
 
