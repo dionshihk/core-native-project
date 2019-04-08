@@ -54,7 +54,7 @@ export async function ajax<TRequest, TResponse>(method: string, path: string, pa
             const errorMessage = responseData && responseData.message ? responseData.message : `failed to call ${url}`;
             const errorId = responseData && responseData.id ? responseData.id : null;
             const errorCode = responseData && responseData.errorCode ? responseData.errorCode : null;
-            throw new APIException(errorMessage, response.status, requestURL, errorId, errorCode);
+            throw new APIException(errorMessage, response.status, responseData, requestURL, errorId, errorCode);
         }
     } catch (e) {
         // Only APIException, NetworkConnectionException can be thrown

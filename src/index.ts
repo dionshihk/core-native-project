@@ -3,7 +3,7 @@ import "@babel/polyfill";
 export {startApp} from "./platform/bootstrap";
 export {Module} from "./platform/Module";
 
-export {ajax} from "./util/network";
+export {ajax, setRequestInterceptor, setResponseInterceptor} from "./util/network";
 export {call} from "./util/sagaCall";
 export {ErrorBoundary} from "./util/ErrorBoundary";
 
