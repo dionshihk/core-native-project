@@ -2,7 +2,7 @@ import React, {ComponentType} from "react";
 import {AppRegistry} from "react-native";
 import {Provider} from "react-redux";
 import {app} from "../app";
-import {EventLog, EventLoggerConfig} from "../EventLogger";
+import {LoggerConfig} from "../Logger";
 import {ErrorListener} from "../module";
 import {call, delay} from "redux-saga/effects";
 import {errorAction} from "../reducer";
@@ -15,34 +15,15 @@ type ErrorHandlerModuleClass = new (name: string, state: {}) => Module<{}> & Err
 interface BootstrapOption {
     registeredAppName: string;
     componentType: ComponentType<{}>;
-    errorHandlerModule: ErrorHandlerModuleClass;
+    errorHandler: ErrorHandlerModuleClass;
     beforeRendering?: () => Promise<any>;
-    eventLoggerConfig?: EventLoggerConfig;
+    logger?: LoggerConfig;
 }
 
 export function startApp(config: BootstrapOption) {
     renderApp(config.registeredAppName, config.componentType, config.beforeRendering);
-    setupGlobalErrorHandler(config.errorHandlerModule);
-
-    if (config.eventLoggerConfig) {
-        app.eventLoggerConfig = config.eventLoggerConfig;
-        if (process.env.NODE_ENV === "production") {
-            app.sagaMiddleware.run(function*() {
-                while (true) {
-                    yield delay(app.eventLoggerConfig!.sendingFrequency * 1000);
-                    try {
-                        const logs: EventLog[] = (app.eventLogger as any).logQueue;
-                        if (logs.length > 0) {
-                            yield call(ajax, "PUT", app.eventLoggerConfig!.serverURL, {}, {events: logs});
-                            (app.eventLogger as any).logQueue = [];
-                        }
-                    } catch (e) {
-                        // Silent if sending error
-                    }
-                }
-            });
-        }
-    }
+    setupGlobalErrorHandler(config.errorHandler);
+    setupLogger(config.logger);
 }
 
 function renderApp(registeredAppName: string, EntryComponent: ComponentType<{}>, beforeRendering?: () => Promise<any>) {
@@ -84,4 +65,26 @@ function setupGlobalErrorHandler(ErrorHandlerModule: ErrorHandlerModuleClass) {
 
     const errorHandler = new ErrorHandlerModule("error-handler", {});
     app.errorHandler = errorHandler.onError.bind(errorHandler);
+}
+
+function setupLogger(config: LoggerConfig | undefined) {
+    if (config) {
+        app.loggerConfig = config;
+        if (process.env.NODE_ENV === "production") {
+            app.sagaMiddleware.run(function*() {
+                while (true) {
+                    yield delay(config.sendingFrequency * 1000);
+                    try {
+                        const logs = app.logger.collect();
+                        if (logs.length > 0) {
+                            yield call(ajax, "PUT", config.serverURL, {}, {events: logs});
+                            app.logger.empty();
+                        }
+                    } catch (e) {
+                        // Silent if sending error
+                    }
+                }
+            });
+        }
+    }
 }

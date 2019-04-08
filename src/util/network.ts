@@ -51,8 +51,10 @@ export async function ajax<TRequest, TResponse>(method: string, path: string, pa
             return responseData as TResponse;
         } else {
             // Try to get server errorMessage from response
-            const errorMessage = responseData && responseData.message && responseData.id ? `${responseData.message}\nError ID: ${responseData.id}` : "Unknown";
-            throw new APIException(errorMessage, response.status, requestURL, responseData);
+            const errorMessage = responseData && responseData.message ? responseData.message : `failed to call ${url}`;
+            const errorId = responseData && responseData.id ? responseData.id : null;
+            const errorCode = responseData && responseData.errorCode ? responseData.errorCode : null;
+            throw new APIException(errorMessage, response.status, requestURL, errorId, errorCode);
         }
     } catch (e) {
         // Only APIException, NetworkConnectionException can be thrown

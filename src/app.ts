@@ -1,7 +1,7 @@
 import {applyMiddleware, compose, createStore, Store, StoreEnhancer} from "redux";
 import createSagaMiddleware, {SagaMiddleware} from "redux-saga";
 import {put, takeEvery} from "redux-saga/effects";
-import {EventLogger, EventLoggerConfig} from "./EventLogger";
+import {LoggerImpl, LoggerConfig} from "./Logger";
 import {ActionHandler, ErrorHandler} from "./module";
 import {Action, ERROR_ACTION_TYPE, errorAction, LOADING_ACTION, rootReducer, State} from "./reducer";
 
@@ -11,15 +11,14 @@ interface App {
     readonly store: Store<State>;
     readonly sagaMiddleware: SagaMiddleware<any>;
     readonly actionHandlers: {[actionType: string]: ActionHandler};
-    readonly eventLogger: EventLogger;
+    readonly logger: LoggerImpl;
     errorHandler: ErrorHandler | null;
-    eventLoggerConfig: EventLoggerConfig | null;
+    loggerConfig: LoggerConfig | null;
 }
 
 function composeWithDevTools(enhancer: StoreEnhancer): StoreEnhancer {
     let composeEnhancers = compose;
-    const production = process.env.NODE_ENV === "production";
-    if (!production) {
+    if (process.env.NODE_ENV !== "production") {
         const extension = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__;
         if (extension) {
             composeEnhancers = extension({
@@ -32,10 +31,9 @@ function composeWithDevTools(enhancer: StoreEnhancer): StoreEnhancer {
 }
 
 function createApp(): App {
-    const eventLogger = new EventLogger();
+    const eventLogger = new LoggerImpl();
     const sagaMiddleware = createSagaMiddleware();
     const store: Store<State> = createStore(rootReducer(), composeWithDevTools(applyMiddleware(sagaMiddleware)));
-    const actionHandlers: {[actionType: string]: ActionHandler} = {};
     sagaMiddleware.run(function* rootSaga() {
         yield takeEvery("*", function*(action: Action<any>) {
             if (action.type === ERROR_ACTION_TYPE) {
@@ -54,13 +52,14 @@ function createApp(): App {
             }
         });
     });
+
     return {
         store,
         sagaMiddleware,
-        actionHandlers,
-        eventLogger,
+        actionHandlers: {},
+        logger: eventLogger,
         errorHandler: null,
-        eventLoggerConfig: null,
+        loggerConfig: null,
     };
 }
 

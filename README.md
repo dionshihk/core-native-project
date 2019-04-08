@@ -1,12 +1,14 @@
 A lightweight framework based on React Native + Redux + Redux Saga, in strict TypeScript.
 
+[![Build Status](https://travis-ci.com/dionshihk/core-native-framework.svg?branch=master)](https://travis-ci.com/dionshihk/core-native-framework)
+
 ## Basic Features:
 
-The whole app is split into __modules__, usually by navigation screens.
+The whole app is split into **modules**, usually by navigation screens.
 
-For each module, it contains __1 state__ and __some actions__, to handle business logic.
+For each module, it contains **1 state** and **some actions**, to handle business logic.
 
-No matter sync or async, every action is automatically wrapped as saga generator.   
+No matter sync or async, every action is automatically wrapped as saga generator.
 
 To extend module features, modules can also implement its own lifecycle actions, like onEnter/onDestroy/onActive etc.
 
@@ -34,9 +36,9 @@ Register a module (including lifecycle actions and custom actions).
 
 ## Similar Frameworks
 
-We also develop a same (95% similarity) framework for website, using the same tech stack.
+We also develop a same (90% similarity) framework for website, using the same tech stack.
 
-https://github.com/neowu/core-fe-project
+https://github.com/dionshihk/react-native-core-framework
 
 Our idea is also inspired by many React-based frameworks
 

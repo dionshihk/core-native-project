@@ -1,6 +1,6 @@
 import {SagaIterator} from "redux-saga";
 import {app} from "../app";
-import {EventLogger} from "../EventLogger";
+import {Logger} from "../Logger";
 import {LifecycleDecoratorFlag, TickIntervalDecoratorFlag} from "../module";
 import {setStateAction, State} from "../reducer";
 
@@ -72,8 +72,8 @@ export class Module<ModuleState extends {}, RouteParam extends {} = {}, RootStat
         return app.store.getState() as Readonly<RootState>;
     }
 
-    protected get logger(): EventLogger {
-        return app.eventLogger;
+    protected get logger(): Logger {
+        return app.logger;
     }
 
     protected setState(newState: Partial<ModuleState>) {

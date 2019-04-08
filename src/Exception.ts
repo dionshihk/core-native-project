@@ -3,14 +3,14 @@ export abstract class Exception {
 }
 
 export class APIException extends Exception {
-    constructor(message: string, public statusCode: number, public requestURL: string, public responseData: any) {
+    constructor(message: string, public statusCode: number, public requestURL: string, public errorId: string | null, public errorCode: string | null) {
         super(message);
     }
 }
 
 export class NetworkConnectionException extends Exception {
     constructor(requestURL: string) {
-        super(`${requestURL} cannot be connected`);
+        super(`failed to connect to ${requestURL}`);
     }
 }
 

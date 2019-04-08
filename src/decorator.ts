@@ -25,7 +25,7 @@ type HandlerInterceptor<S> = (handler: ActionHandler, rootState: Readonly<S>) =>
 type FunctionInterceptor<S> = (handler: () => void, rootState: Readonly<S>) => void;
 
 /**
- * Used for ActionHandler functions
+ * A helper for ActionHandler functions (Saga)
  */
 export function createActionHandlerDecorator<S extends State = State>(interceptor: HandlerInterceptor<S>): HandlerDecorator {
     return (target: any) => {
@@ -40,7 +40,7 @@ export function createActionHandlerDecorator<S extends State = State>(intercepto
 }
 
 /**
- * Used for regular functions
+ * A helper for regular functions
  */
 export function createRegularDecorator<S extends State = State>(interceptor: FunctionInterceptor<S>): VoidFunctionDecorator {
     return (target: any) => {
@@ -55,7 +55,7 @@ export function createRegularDecorator<S extends State = State>(interceptor: Fun
 }
 
 /**
- * Built-in ActionHandler decorators
+ * To mark state.loading[identifier] during Saga execution
  */
 export function Loading(identifier: string = "global"): HandlerDecorator {
     return createActionHandlerDecorator(function*(handler) {
@@ -68,17 +68,20 @@ export function Loading(identifier: string = "global"): HandlerDecorator {
     });
 }
 
+/**
+ * To log (Result=OK) this action, including action name and parameters (masked)
+ */
 export function Log(): HandlerDecorator {
     return (target: any) => {
         const descriptor = target.descriptor;
         const fn: ActionHandler = descriptor.value;
         descriptor.value = function*(...args: any[]): SagaIterator {
-            if (app.eventLoggerConfig) {
+            if (app.loggerConfig) {
                 // Do not use fn directly, it is a different object
-                const params = stringifyWithMask(app.eventLoggerConfig.maskedKeywords || [], "***", ...args);
+                const params = stringifyWithMask(app.loggerConfig.maskedKeywords || [], "***", ...args);
                 const logTypeName = (descriptor.value as any).actionName;
                 const context: {[key: string]: string} = params ? {params} : {};
-                const onLogEnd = app.eventLogger.log(logTypeName, context);
+                const onLogEnd = app.logger.info(logTypeName, context);
                 try {
                     yield* fn.bind(this)(...args);
                 } finally {
@@ -92,6 +95,9 @@ export function Log(): HandlerDecorator {
     };
 }
 
+/**
+ * Required decorator when using lifecycle actions, including onRender/onDestroy/...
+ */
 export function Lifecycle(): LifecycleHandlerDecorator {
     return (target: any) => {
         const descriptor = target.descriptor;
@@ -100,6 +106,9 @@ export function Lifecycle(): LifecycleHandlerDecorator {
     };
 }
 
+/**
+ * Used for onTick action, to specify to tick interval in second
+ */
 export function Interval(second: number): OnTickHandlerDecorator {
     return (target: any) => {
         const descriptor = target.descriptor;
@@ -109,7 +118,27 @@ export function Interval(second: number): OnTickHandlerDecorator {
 }
 
 /**
- * Built-in regular function decorators
+ * If specified, the Saga action cannot be entered by other threads during execution
+ * Useful for error handler action
+ */
+export function Mutex(): HandlerDecorator {
+    let isLocked = false;
+    return createActionHandlerDecorator(function*(handler) {
+        if (!isLocked) {
+            try {
+                isLocked = true;
+                yield* handler();
+            } finally {
+                isLocked = false;
+            }
+        }
+    });
+}
+
+/**
+ * For Regular function ONLY
+ *
+ * Throttle the execution of a regular function
  */
 export function Throttle(millisecond: number): VoidFunctionDecorator {
     let hasCalled = false;
@@ -124,6 +153,13 @@ export function Throttle(millisecond: number): VoidFunctionDecorator {
     });
 }
 
+/**
+ * For Regular function ONLY
+ *
+ * Memoize the last computed result, and return the same value if given the same input
+ * Input equality is based on JSON.stringify by default
+ * Only used for pure functions
+ */
 const defaultMemoKeyGenerator = (args: any[]) => JSON.stringify(args);
 export function Memo(memoKeyGenerator: (args: any[]) => string = defaultMemoKeyGenerator): AnyFunctionDecorator {
     return (target: any) => {
