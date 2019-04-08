@@ -140,18 +140,6 @@ export function Mutex(): HandlerDecorator {
  *
  * Throttle the execution of a regular function
  */
-export function Throttle(millisecond: number): VoidFunctionDecorator {
-    let hasCalled = false;
-    return createRegularDecorator(handler => {
-        if (!hasCalled) {
-            handler();
-            hasCalled = true;
-            setTimeout(() => {
-                hasCalled = false;
-            }, millisecond);
-        }
-    });
-}
 
 /**
  * For Regular function ONLY
