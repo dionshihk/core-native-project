@@ -1,6 +1,7 @@
 export {startApp} from "./platform/bootstrap";
 export {Module} from "./platform/Module";
 
+export {async} from "./util/async";
 export {ajax, setRequestInterceptor, setResponseInterceptor} from "./util/network";
 export {call} from "./util/sagaCall";
 export {ErrorBoundary} from "./util/ErrorBoundary";
