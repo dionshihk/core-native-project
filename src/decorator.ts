@@ -138,12 +138,6 @@ export function Mutex(): HandlerDecorator {
 /**
  * For Regular function ONLY
  *
- * Throttle the execution of a regular function
- */
-
-/**
- * For Regular function ONLY
- *
  * Memoize the last computed result, and return the same value if given the same input
  * Input equality is based on JSON.stringify by default
  * Only used for pure functions
