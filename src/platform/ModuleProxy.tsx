@@ -4,8 +4,8 @@ import {NavigationEventSubscription, NavigationScreenProps} from "react-navigati
 import {SagaIterator, Task} from "redux-saga";
 import {delay, put} from "redux-saga/effects";
 import {app} from "../app";
-import {ActionCreators, ActionHandler} from "../module";
-import {errorAction, setStateAction} from "../reducer";
+import {ActionCreators, executeAction} from "../module";
+import {setStateAction} from "../reducer";
 import {Module, ModuleLifecycleListener} from "./Module";
 
 export class ModuleProxy<M extends Module<any>> {
@@ -97,9 +97,9 @@ export class ModuleProxy<M extends Module<any>> {
 
                 if (lifecycleListener.onEnter.isLifecycle) {
                     if ("navigation" in props && "state" in props.navigation) {
-                        yield* runSafely(lifecycleListener.onEnter.bind(lifecycleListener), props.navigation.state.params, props.navigation.state.path);
+                        yield* executeAction(lifecycleListener.onEnter.bind(lifecycleListener), props.navigation.state.params, props.navigation.state.path);
                     } else {
-                        yield* runSafely(lifecycleListener.onEnter.bind(lifecycleListener), {}, null);
+                        yield* executeAction(lifecycleListener.onEnter.bind(lifecycleListener), {}, null);
                     }
                 }
 
@@ -107,7 +107,7 @@ export class ModuleProxy<M extends Module<any>> {
                     const tickIntervalInMillisecond = (lifecycleListener.onTick.tickInterval || 5) * 1000;
                     const boundTicker = lifecycleListener.onTick.bind(lifecycleListener);
                     while (true) {
-                        yield* runSafely(boundTicker);
+                        yield* executeAction(boundTicker);
                         yield delay(tickIntervalInMillisecond);
                     }
                 }
@@ -117,13 +117,5 @@ export class ModuleProxy<M extends Module<any>> {
                 return <ComponentType {...this.props} />;
             }
         };
-    }
-}
-
-function* runSafely(handler: ActionHandler, ...payload: any[]): SagaIterator {
-    try {
-        yield* handler(...payload);
-    } catch (error) {
-        yield put(errorAction(error));
     }
 }

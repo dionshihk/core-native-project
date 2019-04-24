@@ -1,9 +1,10 @@
 import {SagaIterator} from "redux-saga";
+import {put} from "redux-saga/effects";
 import {app} from "./app";
 import {Exception} from "./Exception";
 import {Module, ModuleLifecycleListener} from "./platform/Module";
 import {ModuleProxy} from "./platform/ModuleProxy";
-import {Action, setStateAction} from "./reducer";
+import {Action, errorAction, setStateAction} from "./reducer";
 
 export interface LifecycleDecoratorFlag {
     isLifecycle?: boolean;
@@ -45,7 +46,21 @@ export function register<M extends Module<any>>(module: M): ModuleProxy<M> {
         app.actionHandlers[qualifiedActionType] = method.bind(module);
     });
 
+    // Execute register action
+    const lifecycleListener = module as ModuleLifecycleListener;
+    if (lifecycleListener.onRegister.isLifecycle) {
+        app.store.dispatch(actions.onRegister());
+    }
+
     return new ModuleProxy(module, actions);
+}
+
+export function* executeAction(handler: ActionHandler, ...payload: any[]): SagaIterator {
+    try {
+        yield* handler(...payload);
+    } catch (error) {
+        yield put(errorAction(error));
+    }
 }
 
 function getKeys<M extends Module<any>>(module: M) {
