@@ -1,6 +1,7 @@
 import React from "react";
 
 /**
+ * CAVEAT:
  * When using require("..").Component in React Native, the type info is discarded
  * If the Props of returned component is not {}, you should explicitly specify the generic <T> for the required component (but not recommended)
  */
@@ -10,8 +11,6 @@ export function async<T>(componentLoader: () => React.ComponentType<T>, loadingC
     }
 
     return class AsyncWrapperComponent extends React.PureComponent<T, State> {
-        public static navigationOptions = {};
-
         constructor(props: T) {
             super(props);
             this.state = {Component: null};
