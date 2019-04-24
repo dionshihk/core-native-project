@@ -21,8 +21,12 @@ export class ModuleProxy<M extends Module<any>> {
         const lifecycleListener = this.module as ModuleLifecycleListener;
         const actions = this.actions as any;
 
-        return class MainComponent extends React.PureComponent<P, {appState: AppStateStatus}> {
+        return class extends React.PureComponent<P, {appState: AppStateStatus}> {
             public static displayName = `ModuleBoundary(${moduleName})`;
+
+            // Copy static navigation options
+            public static navigationOptions = (ComponentType as any).navigationOptions;
+
             private readonly lifecycleSagaTask: Task;
             private focusSubscription: NavigationEventSubscription | undefined;
             private blurSubscription: NavigationEventSubscription | undefined;

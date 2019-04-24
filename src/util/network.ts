@@ -51,10 +51,10 @@ export async function ajax<TRequest, TResponse>(method: string, path: string, pa
             return responseData as TResponse;
         } else {
             // Try to get server errorMessage from response
-            const errorMessage = responseData && responseData.message ? responseData.message : `failed to call ${url}`;
+            const errorMessage = responseData && responseData.message ? responseData.message : `failed to call ${requestURL}`;
             const errorId = responseData && responseData.id ? responseData.id : null;
             const errorCode = responseData && responseData.errorCode ? responseData.errorCode : null;
-            throw new APIException(errorMessage, response.status, responseData, requestURL, errorId, errorCode);
+            throw new APIException(errorMessage, response.status, requestURL, responseData, errorId, errorCode);
         }
     } catch (e) {
         // Only APIException, NetworkConnectionException can be thrown
@@ -67,13 +67,13 @@ export async function ajax<TRequest, TResponse>(method: string, path: string, pa
     }
 }
 
-export function url(pattern: string, params: object): string {
-    let url = pattern;
+export function url(path: string, params: object): string {
+    let pathWithParams = path;
     Object.entries(params).forEach(([name, value]) => {
         const encodedValue = encodeURIComponent(value.toString());
-        url = url.replace(":" + name, encodedValue);
+        pathWithParams = pathWithParams.replace(":" + name, encodedValue);
     });
-    return url;
+    return pathWithParams;
 }
 
 export function queryString(params: any): string {

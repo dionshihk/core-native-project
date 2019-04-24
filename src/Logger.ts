@@ -44,11 +44,6 @@ export interface Logger {
      * @errorCode: Naming in upper-case and underscore, e.g: SOME_DATA
      */
     error(errorCode: string, action?: string, info?: {[key: string]: string}): () => void;
-
-    /**
-     * This function can auto convert to ERROR/WARN level with exception information, according to type
-     */
-    exception(exception: Exception): () => void;
 }
 
 export class LoggerImpl implements Logger {

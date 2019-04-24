@@ -8,21 +8,18 @@ import {call, delay} from "redux-saga/effects";
 import {errorAction} from "../reducer";
 import {ErrorBoundary} from "../util/ErrorBoundary";
 import {ajax} from "../util/network";
-import {Module} from "./Module";
-
-type ErrorHandlerModuleClass = new (name: string, state: {}) => Module<{}> & ErrorListener;
 
 interface BootstrapOption {
     registeredAppName: string;
     componentType: ComponentType<{}>;
-    errorHandler: ErrorHandlerModuleClass;
+    errorListener: ErrorListener;
     beforeRendering?: () => Promise<any>;
     logger?: LoggerConfig;
 }
 
 export function startApp(config: BootstrapOption) {
     renderApp(config.registeredAppName, config.componentType, config.beforeRendering);
-    setupGlobalErrorHandler(config.errorHandler);
+    setupGlobalErrorHandler(config.errorListener);
     setupLogger(config.logger);
 }
 
@@ -55,7 +52,7 @@ function renderApp(registeredAppName: string, EntryComponent: ComponentType<{}>,
     AppRegistry.registerComponent(registeredAppName, () => WrappedAppComponent);
 }
 
-function setupGlobalErrorHandler(ErrorHandlerModule: ErrorHandlerModuleClass) {
+function setupGlobalErrorHandler(errorListener: ErrorListener) {
     ErrorUtils.setGlobalHandler((error, isFatal) => {
         if (isFatal) {
             console.info("***** Fatal Error *****");
@@ -63,8 +60,7 @@ function setupGlobalErrorHandler(ErrorHandlerModule: ErrorHandlerModuleClass) {
         app.store.dispatch(errorAction(error));
     });
 
-    const errorHandler = new ErrorHandlerModule("error-handler", {});
-    app.errorHandler = errorHandler.onError.bind(errorHandler);
+    app.errorHandler = errorListener.onError.bind(errorListener);
 }
 
 function setupLogger(config: LoggerConfig | undefined) {
