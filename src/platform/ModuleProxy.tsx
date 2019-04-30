@@ -2,7 +2,7 @@ import React from "react";
 import {AppState, AppStateStatus} from "react-native";
 import {NavigationEventSubscription, NavigationScreenProps} from "react-navigation";
 import {SagaIterator, Task} from "redux-saga";
-import {delay, put} from "redux-saga/effects";
+import {delay} from "redux-saga/effects";
 import {app} from "../app";
 import {ActionCreators, executeAction} from "../module";
 import {setStateAction} from "../reducer";
