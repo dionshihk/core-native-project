@@ -38,8 +38,8 @@ function createApp(): App {
     sagaMiddleware.run(function* rootSaga() {
         yield takeEvery("*", function*(action: Action<any>) {
             if (action.type === ERROR_ACTION_TYPE) {
-                const errorAction = action as Action<Exception>;
                 if (app.errorHandler) {
+                    const errorAction = action as Action<Exception>;
                     app.logger.exception(errorAction.payload);
                     yield* app.errorHandler(errorAction.payload);
                 }
