@@ -1,6 +1,6 @@
 A lightweight framework based on React Native + Redux + Redux Saga, in strict TypeScript.
 
-[![Build Status](https://travis-ci.com/dionshihk/core-native-framework.svg?branch=master)](https://travis-ci.com/dionshihk/core-native-framework)
+[![Build Status](https://travis-ci.com/dionshihk/core-native-project.svg?branch=master)](https://travis-ci.com/dionshihk/core-native-project)
 [![Language grade: JavaScript](https://img.shields.io/lgtm/grade/javascript/g/dionshihk/core-native-project.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/dionshihk/core-native-project/context:javascript)
 [![Total alerts](https://img.shields.io/lgtm/alerts/g/dionshihk/core-native-project.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/dionshihk/core-native-project/alerts/)
 
