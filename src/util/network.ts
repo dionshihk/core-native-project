@@ -89,7 +89,7 @@ export function queryString(params: any): string {
         entries
             .filter(_ => _[1] !== null) // If some value is NULL, do not append to URL
             .map(([key, value]) => {
-                const valueString = value instanceof Date ? value.toISOString() : value.toString();
+                const valueString = value instanceof Date ? value.toISOString() : String(value);
                 return `${encodeURIComponent(key)}=${encodeURIComponent(valueString)}`;
             })
             .join("&")

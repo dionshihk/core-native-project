@@ -15,4 +15,5 @@ test("queryString", () => {
     expect(queryString({id: 1, name: "Tom"})).toEqual("?id=1&name=Tom");
     expect(queryString({id: 1, name: "="})).toEqual("?id=1&name=%3D");
     expect(queryString({date})).toEqual("?date=2018-05-02T00%3A00%3A00.000Z");
+    expect(queryString({id: null, name: "Tom"})).toEqual("?name=Tom");
 });
