@@ -8,18 +8,23 @@ import {call, delay} from "redux-saga/effects";
 import {errorAction} from "../reducer";
 import {ErrorBoundary} from "../util/ErrorBoundary";
 import {ajax} from "../util/network";
+import {initSourceMaps, getStackTrace} from "react-native-source-maps";
 
 interface BootstrapOption {
     registeredAppName: string;
     componentType: ComponentType<{}>;
     errorListener: ErrorListener;
     beforeRendering?: () => Promise<any>;
+    sourceMapFile?: string;
     logger?: LoggerConfig;
 }
 
 export function startApp(config: BootstrapOption) {
+    if (config.sourceMapFile) {
+        initSourceMaps({sourceMapBundle: config.sourceMapFile});
+    }
     renderApp(config.registeredAppName, config.componentType, config.beforeRendering);
-    setupGlobalErrorHandler(config.errorListener);
+    setupGlobalErrorHandler(config.errorListener, config.sourceMapFile !== undefined);
     setupLogger(config.logger);
 }
 
@@ -52,10 +57,14 @@ function renderApp(registeredAppName: string, EntryComponent: ComponentType<{}>,
     AppRegistry.registerComponent(registeredAppName, () => WrappedAppComponent);
 }
 
-function setupGlobalErrorHandler(errorListener: ErrorListener) {
-    ErrorUtils.setGlobalHandler((error, isFatal) => {
+function setupGlobalErrorHandler(errorListener: ErrorListener, supportSourceMap: boolean) {
+    ErrorUtils.setGlobalHandler(async (error, isFatal) => {
         if (isFatal) {
             console.info("***** Fatal Error *****");
+        }
+        if (supportSourceMap && !__DEV__) {
+            error.originalStack = error.stack;
+            error.stack = await getStackTrace(error);
         }
         app.store.dispatch(errorAction(error));
     });

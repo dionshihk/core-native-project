@@ -76,7 +76,7 @@ export function url(path: string, params: object): string {
     return pathWithParams;
 }
 
-export function queryString(params: any): string {
+export function queryString(params: {[key: string]: any} | null | undefined): string {
     if (!params) {
         return "";
     }
