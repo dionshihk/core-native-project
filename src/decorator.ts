@@ -19,7 +19,6 @@ type HandlerDecorator = (target: object, propertyKey: string, descriptor: TypedP
 type LifecycleHandlerDecorator = (target: object, propertyKey: keyof ModuleLifecycleListener, descriptor: TypedPropertyDescriptor<ActionHandler & LifecycleDecoratorFlag>) => TypedPropertyDescriptor<ActionHandler>;
 type OnTickHandlerDecorator = (target: object, propertyKey: "onTick", descriptor: TypedPropertyDescriptor<ActionHandler & TickIntervalDecoratorFlag>) => TypedPropertyDescriptor<ActionHandler>;
 type VoidFunctionDecorator = (target: object, propertyKey: string, descriptor: TypedPropertyDescriptor<(...args: any[]) => void>) => TypedPropertyDescriptor<(...args: any[]) => void>;
-type AnyFunctionDecorator = (target: object, propertyKey: string, descriptor: TypedPropertyDescriptor<(...args: any[]) => any>) => TypedPropertyDescriptor<(...args: any[]) => any>;
 
 type HandlerInterceptor<S> = (handler: ActionHandler, rootState: Readonly<S>) => SagaIterator;
 type FunctionInterceptor<S> = (handler: () => void, rootState: Readonly<S>) => void;
@@ -133,28 +132,4 @@ export function Mutex(): HandlerDecorator {
             }
         }
     });
-}
-
-/**
- * For Regular function ONLY
- *
- * Memoize the last computed result, and return the same value if given the same input
- * Input equality is based on JSON.stringify by default
- * Only used for pure functions
- */
-const defaultMemoKeyGenerator = (args: any[]) => JSON.stringify(args);
-export function Memo(memoKeyGenerator: (args: any[]) => string = defaultMemoKeyGenerator): AnyFunctionDecorator {
-    return (target: any) => {
-        const descriptor = target.descriptor;
-        const fn = descriptor.value;
-        const cache = {};
-        descriptor.value = (...args: any[]) => {
-            const paramKey = memoKeyGenerator(args);
-            if (!cache[paramKey]) {
-                cache[paramKey] = fn(...args);
-            }
-            return cache[paramKey];
-        };
-        return target;
-    };
 }
