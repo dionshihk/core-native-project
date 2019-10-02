@@ -54,7 +54,14 @@ export async function ajax<TRequest, TResponse>(method: string, path: string, pa
             const errorMessage = responseData && responseData.message ? responseData.message : `failed to call ${requestURL}`;
             const errorId = responseData && responseData.id ? responseData.id : null;
             const errorCode = responseData && responseData.errorCode ? responseData.errorCode : null;
-            throw new APIException(errorMessage, response.status, requestURL, responseData, errorId, errorCode);
+
+            if (!errorId && (response.status === 502 || response.status === 504)) {
+                // Treat "cloud" error as Network Exception, e.g: gateway issue, load balancer unconnected to application server
+                // Note: Status 503 is maintenance
+                throw new NetworkConnectionException(`gateway error (${response.status})`, requestURL);
+            } else {
+                throw new APIException(errorMessage, response.status, requestURL, responseData, errorId, errorCode);
+            }
         }
     } catch (e) {
         // Only APIException, NetworkConnectionException can be thrown
@@ -62,7 +69,7 @@ export async function ajax<TRequest, TResponse>(method: string, path: string, pa
             throw e;
         } else {
             console.info("Network Native Exception", e);
-            throw new NetworkConnectionException(requestURL);
+            throw new NetworkConnectionException(`failed to connect to ${url}`, requestURL);
         }
     }
 }
