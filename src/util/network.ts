@@ -69,7 +69,7 @@ export async function ajax<TRequest, TResponse>(method: string, path: string, pa
             throw e;
         } else {
             console.info("Network Native Exception", e);
-            throw new NetworkConnectionException(`failed to connect to ${url}`, requestURL);
+            throw new NetworkConnectionException(`failed to connect to ${requestURL}`, requestURL);
         }
     }
 }
