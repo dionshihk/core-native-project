@@ -78,9 +78,9 @@ export function Log(): HandlerDecorator {
             if (app.loggerConfig) {
                 // Do not use fn directly, it is a different object
                 const params = stringifyWithMask(app.loggerConfig.maskedKeywords || [], "***", ...args);
-                const logTypeName = (descriptor.value as any).actionName;
+                const actionName = (descriptor.value as any).actionName;
                 const context: {[key: string]: string} = params ? {params} : {};
-                const onLogEnd = app.logger.info(logTypeName, context);
+                const onLogEnd = app.logger.info(actionName, context);
                 try {
                     yield* fn.bind(this)(...args);
                 } finally {
