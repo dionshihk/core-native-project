@@ -5,7 +5,6 @@ import {LifecycleDecoratorFlag, TickIntervalDecoratorFlag} from "../module";
 import {setStateAction, State} from "../reducer";
 
 export interface ModuleLifecycleListener<RouteParam extends {} = {}> {
-    onRegister: (() => SagaIterator) & LifecycleDecoratorFlag;
     onEnter: ((routeParameters: RouteParam, path: string | null) => SagaIterator) & LifecycleDecoratorFlag;
     onDestroy: (() => SagaIterator) & LifecycleDecoratorFlag;
     onTick: (() => SagaIterator) & LifecycleDecoratorFlag & TickIntervalDecoratorFlag;
@@ -18,57 +17,50 @@ export interface ModuleLifecycleListener<RouteParam extends {} = {}> {
 export class Module<ModuleState extends {}, RouteParam extends {} = {}, RootState extends State = State> implements ModuleLifecycleListener<RouteParam> {
     public constructor(public readonly name: string, private readonly initialState: ModuleState) {}
 
-    *onRegister(): SagaIterator {
-        /**
-         * Called when the module is registered the first time
-         * Usually used for fetching configuration
-         */
-    }
-
     *onEnter(routeParameters: RouteParam, path: string | null): SagaIterator {
         /**
-         * Called when the attached component is mounted
+         * Called when the attached component is mounted.
          * The routeParameters and path are specified if the component is connected to React Navigator.
          */
     }
 
     *onDestroy(): SagaIterator {
         /**
-         * Called when the attached component is going to unmount
+         * Called when the attached component is going to unmount.
          */
     }
 
     *onTick(): SagaIterator {
         /**
-         * Called periodically during the lifecycle of attached component
-         * Usually used together with @Interval decorator, to specify the period (in second)
-         * Attention: The next tick will not be triggered, until the current tick has finished
+         * Called periodically during the lifecycle of attached component.
+         * Usually used together with @Interval decorator, to specify the period (in second).
+         * Attention: The next tick will not be triggered, until the current tick has finished.
          */
     }
 
     *onAppActive(): SagaIterator {
         /**
-         * Called when the app becomes active (foreground) from background task
-         * Usually used for fetching updated configuration
+         * Called when the app becomes active (foreground) from background task.
+         * Usually used for fetching updated configuration.
          */
     }
 
     *onAppInactive(): SagaIterator {
         /**
-         * Called when the app becomes inactive (background) from foreground task
-         * Usually used for storing some data into storage
+         * Called when the app becomes inactive (background) from foreground task.
+         * Usually used for storing some data into storage.
          */
     }
 
     *onFocus(): SagaIterator {
         /**
-         * Called when the attached component is connected to React Navigator, and gets focused
+         * Called when the attached component is connected to React Navigator, and gets focused.
          */
     }
 
     *onBlur(): SagaIterator {
         /**
-         * Called when the attached component is connected to React Navigator, and gets blurred
+         * Called when the attached component is connected to React Navigator, and gets blurred.
          */
     }
 

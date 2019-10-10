@@ -75,19 +75,14 @@ export function Log(): HandlerDecorator {
         const descriptor = target.descriptor;
         const fn: ActionHandler = descriptor.value;
         descriptor.value = function*(...args: any[]): SagaIterator {
-            if (app.loggerConfig) {
-                // Do not use fn directly, it is a different object
-                const params = stringifyWithMask(app.loggerConfig.maskedKeywords || [], "***", ...args);
-                const actionName = (descriptor.value as any).actionName;
-                const context: {[key: string]: string} = params ? {params} : {};
-                const onLogEnd = app.logger.info(actionName, context);
-                try {
-                    yield* fn.bind(this)(...args);
-                } finally {
-                    onLogEnd();
-                }
-            } else {
+            // Do not use fn directly, it is a different object
+            const params = stringifyWithMask(app.loggerConfig && app.loggerConfig.maskedKeywords ? app.loggerConfig.maskedKeywords : [], "***", ...args);
+            const actionName = (descriptor.value as any).actionName;
+            const onLogEnd = app.logger.info(actionName, params ? {params} : {});
+            try {
                 yield* fn.bind(this)(...args);
+            } finally {
+                onLogEnd();
             }
         };
         return target;
@@ -95,7 +90,7 @@ export function Log(): HandlerDecorator {
 }
 
 /**
- * Required decorator when using lifecycle actions, including onRender/onDestroy/...
+ * Required decorator when using lifecycle actions, including onEnter/onDestroy/...
  */
 export function Lifecycle(): LifecycleHandlerDecorator {
     return (target: any) => {

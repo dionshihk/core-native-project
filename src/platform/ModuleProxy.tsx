@@ -22,20 +22,19 @@ export class ModuleProxy<M extends Module<any>> {
         const actions = this.actions as any;
 
         return class extends React.PureComponent<P, {appState: AppStateStatus}> {
-            public static displayName = `ModuleBoundary(${moduleName})`;
-
+            static displayName = `ModuleBoundary(${moduleName})`;
             // Copy static navigation options
-            public static navigationOptions = (ComponentType as any).navigationOptions;
+            static navigationOptions = (ComponentType as any).navigationOptions;
 
             private readonly lifecycleSagaTask: Task;
             private focusSubscription: NavigationEventSubscription | undefined;
             private blurSubscription: NavigationEventSubscription | undefined;
+            private successTickCount: number = 0;
 
             constructor(props: P) {
                 super(props);
                 this.state = {appState: AppState.currentState};
                 this.lifecycleSagaTask = app.sagaMiddleware.run(this.lifecycleSaga.bind(this));
-                console.info(`Module [${moduleName}] attached component initially rendered`);
             }
 
             componentDidMount() {
@@ -75,7 +74,7 @@ export class ModuleProxy<M extends Module<any>> {
                 this.lifecycleSagaTask.cancel();
                 app.store.dispatch(setStateAction(moduleName, initialState, `@@${moduleName}/@@reset`));
                 AppState.removeEventListener("change", this.onAppStateChange);
-                console.info(`Module [${moduleName}] attached component destroyed`);
+                app.logger.info(`${moduleName}/@@DESTROY`, {successTickCount: this.successTickCount.toString()});
             }
 
             onAppStateChange = (nextAppState: AppStateStatus) => {
@@ -94,6 +93,7 @@ export class ModuleProxy<M extends Module<any>> {
 
             private *lifecycleSaga(): SagaIterator {
                 const props = this.props as (NavigationScreenProps | {});
+                app.logger.info(`${moduleName}/@@ENTER`, {componentProps: JSON.stringify(props)});
 
                 if (lifecycleListener.onEnter.isLifecycle) {
                     if ("navigation" in props && "state" in props.navigation) {
@@ -108,6 +108,7 @@ export class ModuleProxy<M extends Module<any>> {
                     const boundTicker = lifecycleListener.onTick.bind(lifecycleListener);
                     while (true) {
                         yield* executeAction(boundTicker);
+                        this.successTickCount++;
                         yield delay(tickIntervalInMillisecond);
                     }
                 }
