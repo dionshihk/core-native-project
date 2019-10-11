@@ -1,3 +1,5 @@
+import "./debug";
+
 export {startApp} from "./platform/bootstrap";
 export {Module} from "./platform/Module";
 
