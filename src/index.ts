@@ -8,7 +8,7 @@ export {ajax, setRequestInterceptor, setResponseInterceptor} from "./util/networ
 export {call} from "./util/sagaCall";
 export {ErrorBoundary} from "./util/ErrorBoundary";
 
-export {createActionHandlerDecorator, createRegularDecorator, Loading, Interval, Lifecycle, Log, Mutex} from "./decorator";
+export {createActionHandlerDecorator, createRegularDecorator, Loading, Interval, Lifecycle, Log, Mutex, RetryOnNetworkConnectionError} from "./decorator";
 export {Exception, APIException, NetworkConnectionException, RuntimeException, ReactLifecycleException} from "./Exception";
 export {showLoading, loadingAction, State} from "./reducer";
 export {register, ErrorListener} from "./module";

@@ -1,6 +1,6 @@
 {
   "name": "core-native",
-  "version": "1.4.3",
+  "version": "1.4.4",
   "main": "lib/index.js",
   "module": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -15,7 +15,7 @@
     "format": "prettier --config node/prettier.json --write \"{src,test}/**/*.{ts,tsx}\""
   },
   "devDependencies": {
-    "@types/jest": "24.0.18",
+    "@types/jest": "24.0.19",
     "chalk": "2.4.2",
     "fs-extra": "8.1.0",
     "jest": "24.9.0",
@@ -24,12 +24,13 @@
     "ts-node": "8.4.1",
     "tslint": "5.20.0",
     "tslint-react": "4.1.0",
-    "typescript": "3.5.3"
+    "typescript": "3.5.3",
+    "yargs": "14.2.0"
   },
   "dependencies": {
-    "@types/node": "12.7.12",
+    "@types/node": "12.11.1",
     "@types/react": "*",
-    "@types/react-native": "0.60.19",
+    "@types/react-native": "0.60.21",
     "@types/react-navigation": "3.0.8",
     "@types/react-redux": "7.1.4",
     "react": "16.10.2",
@@ -39,9 +40,9 @@
     "tslib": "1.10.0"
   },
   "peerDependencies": {
-    "@types/node": "12.7.12",
+    "@types/node": "12.11.1",
     "@types/react": "*",
-    "@types/react-native": "0.60.19",
+    "@types/react-native": "0.60.21",
     "@types/react-navigation": "3.0.8",
     "@types/react-redux": "7.1.4",
     "react": "16.10.2",

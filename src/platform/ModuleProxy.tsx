@@ -30,6 +30,7 @@ export class ModuleProxy<M extends Module<any>> {
             private focusSubscription: NavigationEventSubscription | undefined;
             private blurSubscription: NavigationEventSubscription | undefined;
             private successTickCount: number = 0;
+            private mountedTime: number = Date.now();
 
             constructor(props: P) {
                 super(props);
@@ -74,7 +75,10 @@ export class ModuleProxy<M extends Module<any>> {
                 this.lifecycleSagaTask.cancel();
                 app.store.dispatch(setStateAction(moduleName, initialState, `@@${moduleName}/@@reset`));
                 AppState.removeEventListener("change", this.onAppStateChange);
-                app.logger.info(`${moduleName}/@@DESTROY`, {successTickCount: this.successTickCount.toString()});
+                app.logger.info(`${moduleName}/@@DESTROY`, {
+                    successTickCount: this.successTickCount.toString(),
+                    stayingSecond: ((Date.now() - this.mountedTime) / 1000).toFixed(2),
+                });
             }
 
             onAppStateChange = (nextAppState: AppStateStatus) => {
