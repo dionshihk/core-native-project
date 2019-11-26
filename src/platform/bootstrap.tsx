@@ -73,7 +73,7 @@ function setupLogger(config: LoggerConfig | undefined) {
                     try {
                         const logs = app.logger.collect();
                         if (logs.length > 0) {
-                            yield call(ajax, "PUT", config.serverURL, {}, {events: logs});
+                            yield call(ajax, "POST", config.serverURL, {}, {events: logs});
                             app.logger.empty();
                         }
                     } catch (e) {
