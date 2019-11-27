@@ -1,29 +1,27 @@
 import React from "react";
 import {AppState, AppStateStatus} from "react-native";
-import {NavigationEventSubscription, NavigationScreenProps} from "react-navigation";
+import {NavigationEventSubscription, NavigationInjectedProps} from "react-navigation";
 import {SagaIterator, Task} from "redux-saga";
 import {delay} from "redux-saga/effects";
 import {app} from "../app";
 import {ActionCreators, executeAction} from "../module";
-import {setStateAction} from "../reducer";
 import {Module, ModuleLifecycleListener} from "./Module";
 
 export class ModuleProxy<M extends Module<any>> {
-    public constructor(private module: M, private actions: ActionCreators<M>) {}
+    constructor(private module: M, private actions: ActionCreators<M>) {}
 
-    public getActions(): ActionCreators<M> {
+    getActions(): ActionCreators<M> {
         return this.actions;
     }
 
-    public attachLifecycle<P extends {}>(ComponentType: React.ComponentType<P>): React.ComponentType<P> {
+    attachLifecycle<P extends {}>(ComponentType: React.ComponentType<P>): React.ComponentType<P> {
         const moduleName = this.module.name;
-        const initialState = (this.module as any).initialState;
         const lifecycleListener = this.module as ModuleLifecycleListener;
         const actions = this.actions as any;
 
         return class extends React.PureComponent<P, {appState: AppStateStatus}> {
             static displayName = `ModuleBoundary(${moduleName})`;
-            // Copy static navigation options
+            // Copy static navigation options, important for navigator
             static navigationOptions = (ComponentType as any).navigationOptions;
 
             private readonly lifecycleSagaTask: Task;
@@ -43,7 +41,7 @@ export class ModuleProxy<M extends Module<any>> {
                 // Ref: https://facebook.github.io/react-native/docs/appstate#addeventlistener
                 AppState.addEventListener("change", this.onAppStateChange);
 
-                const props = this.props as (NavigationScreenProps | {});
+                const props = this.props as NavigationInjectedProps | {};
                 if ("navigation" in props) {
                     const navigation = props.navigation;
                     this.focusSubscription = navigation.addListener("didFocus", () => {
@@ -67,14 +65,12 @@ export class ModuleProxy<M extends Module<any>> {
                 if (this.blurSubscription) {
                     this.blurSubscription.remove();
                 }
-
                 if (this.focusSubscription) {
                     this.focusSubscription.remove();
                 }
+                AppState.removeEventListener("change", this.onAppStateChange);
 
                 this.lifecycleSagaTask.cancel();
-                app.store.dispatch(setStateAction(moduleName, initialState, `@@${moduleName}/@@reset`));
-                AppState.removeEventListener("change", this.onAppStateChange);
                 app.logger.info(`${moduleName}/@@DESTROY`, {
                     successTickCount: this.successTickCount.toString(),
                     stayingSecond: ((Date.now() - this.mountedTime) / 1000).toFixed(2),
@@ -95,31 +91,36 @@ export class ModuleProxy<M extends Module<any>> {
                 this.setState({appState: nextAppState});
             };
 
-            private *lifecycleSaga(): SagaIterator {
-                const props = this.props as (NavigationScreenProps | {});
-                app.logger.info(`${moduleName}/@@ENTER`, {componentProps: JSON.stringify(props)});
+            render() {
+                return <ComponentType {...this.props} />;
+            }
 
+            private *lifecycleSaga(): SagaIterator {
+                const props = this.props as NavigationInjectedProps | {};
+
+                const enterActionName = `${moduleName}/@@ENTER`;
                 if (lifecycleListener.onEnter.isLifecycle) {
-                    if ("navigation" in props && "state" in props.navigation) {
-                        yield* executeAction(lifecycleListener.onEnter.bind(lifecycleListener), props.navigation.state.params, props.navigation.state.path);
+                    const startTime = Date.now();
+                    if ("navigation" in props) {
+                        yield* executeAction(enterActionName, lifecycleListener.onEnter.bind(lifecycleListener), props.navigation.state.params, props.navigation.state.path || null);
                     } else {
-                        yield* executeAction(lifecycleListener.onEnter.bind(lifecycleListener), {}, null);
+                        yield* executeAction(enterActionName, lifecycleListener.onEnter.bind(lifecycleListener), {}, null);
                     }
+                    app.logger.info(enterActionName, {componentProps: JSON.stringify(props)}, Date.now() - startTime);
+                } else {
+                    app.logger.info(enterActionName, {componentProps: JSON.stringify(props)});
                 }
 
                 if (lifecycleListener.onTick.isLifecycle) {
                     const tickIntervalInMillisecond = (lifecycleListener.onTick.tickInterval || 5) * 1000;
                     const boundTicker = lifecycleListener.onTick.bind(lifecycleListener);
+                    const tickActionName = `${moduleName}/@@TICK`;
                     while (true) {
-                        yield* executeAction(boundTicker);
+                        yield* executeAction(tickActionName, boundTicker);
                         this.successTickCount++;
                         yield delay(tickIntervalInMillisecond);
                     }
                 }
-            }
-
-            render() {
-                return <ComponentType {...this.props} />;
             }
         };
     }

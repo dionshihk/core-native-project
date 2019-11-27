@@ -1,6 +1,7 @@
 import {app} from "./app";
 import {APIException, Exception, NetworkConnectionException, ReactLifecycleException, RuntimeException} from "./Exception";
-import {loggerContext} from "./platform/loggerContext";
+import {loggerContext} from "./platform/logger-context";
+import {serializeError} from "./util/error-util";
 
 interface Log {
     date: Date;
@@ -40,7 +41,7 @@ export interface Logger {
     /**
      * Add a log item, whose result is OK
      */
-    info(action: string, info?: {[key: string]: string}): void;
+    info(action: string, info: {[key: string]: string}, elapsedTime?: number): void;
 
     /**
      * Add a log item, whose result is WARN
@@ -67,8 +68,8 @@ export class LoggerImpl implements Logger {
         this.environmentContext = {...this.environmentContext, ...context};
     }
 
-    info(action: string, info?: {[key: string]: string}, elapsedTime?: number): void {
-        return this.appendLog("OK", {action, info: info || {}, elapsedTime: elapsedTime || 0});
+    info(action: string, info: {[key: string]: string}, elapsedTime?: number): void {
+        return this.appendLog("OK", {action, info, elapsedTime: elapsedTime || 0});
     }
 
     warn(data: ErrorLogEntry): void {
@@ -79,15 +80,16 @@ export class LoggerImpl implements Logger {
         return this.appendLog("ERROR", data);
     }
 
-    exception(exception: Exception, action?: string): void {
+    exception(exception: Exception, action?: string, extraInfo?: {[key: string]: string}): void {
         if (exception instanceof NetworkConnectionException) {
             const info: {[key: string]: string} = {
+                ...extraInfo,
                 url: exception.requestURL,
                 errorObject: JSON.stringify(exception.errorObject),
             };
             return this.appendLog("WARN", {action, errorCode: "NETWORK_FAILURE", errorMessage: exception.message, info, elapsedTime: 0});
         } else {
-            const info: {[key: string]: string} = {};
+            const info: {[key: string]: string} = {...extraInfo};
             let isWarning: boolean = false;
             let errorCode: string = "OTHER_ERROR";
 
@@ -98,7 +100,7 @@ export class LoggerImpl implements Logger {
                     isWarning = true;
                 } else if (exception.statusCode === 400) {
                     if (exception.errorCode === "VALIDATION_ERROR") {
-                        errorCode = "API_VALIDATION_FAIL";
+                        errorCode = "API_VALIDATION_ERROR";
                     } else {
                         isWarning = true;
                     }
@@ -116,8 +118,8 @@ export class LoggerImpl implements Logger {
                 info.stackTrace = exception.componentStack;
                 info.appState = JSON.stringify(app.store.getState().app);
             } else if (exception instanceof RuntimeException) {
-                errorCode = "JS_ERROR";
-                info.errorObject = JSON.stringify(exception.errorObject);
+                errorCode = "RUNTIME_ERROR";
+                info.errorObject = serializeError(exception.errorObject);
                 info.appState = JSON.stringify(app.store.getState().app);
             }
 
@@ -136,7 +138,18 @@ export class LoggerImpl implements Logger {
     private appendLog(result: "OK" | "WARN" | "ERROR", data: Pick<Log, "action" | "info" | "errorCode" | "errorMessage" | "elapsedTime">) {
         const completeContext = {};
         Object.entries(this.environmentContext).map(([key, value]) => {
-            completeContext[key] = typeof value === "string" ? value : value();
+            if (typeof value === "string") {
+                completeContext[key] = value;
+            } else {
+                let evaluatedResult: string;
+                try {
+                    evaluatedResult = value();
+                } catch (e) {
+                    evaluatedResult = "[ERROR] " + serializeError(e);
+                    console.warn("Fail to execute logger context: " + serializeError(e));
+                }
+                completeContext[key] = evaluatedResult;
+            }
         });
 
         const event: Log = {

@@ -60,6 +60,7 @@ function build() {
         test();
         lint();
     }
+
     cleanup();
     compile();
     distribute();

@@ -1,5 +1,5 @@
 import React, {ComponentType} from "react";
-import {AppRegistry} from "react-native";
+import {AppRegistry, AppState, AppStateStatus} from "react-native";
 import {Provider} from "react-redux";
 import {app} from "../app";
 import {LoggerConfig} from "../Logger";
@@ -24,10 +24,10 @@ export function startApp(config: BootstrapOption) {
 }
 
 function renderApp(registeredAppName: string, EntryComponent: ComponentType<{}>, beforeRendering?: () => Promise<any>) {
-    class WrappedAppComponent extends React.PureComponent<{}, {initialized: boolean}> {
+    class WrappedAppComponent extends React.PureComponent<{}, {initialized: boolean; appState: AppStateStatus}> {
         constructor(props: {}) {
             super(props);
-            this.state = {initialized: false};
+            this.state = {initialized: false, appState: AppState.currentState};
         }
 
         async componentDidMount() {
@@ -35,7 +35,22 @@ function renderApp(registeredAppName: string, EntryComponent: ComponentType<{}>,
                 await beforeRendering();
             }
             this.setState({initialized: true});
+            AppState.addEventListener("change", this.onAppStateChange);
         }
+
+        componentWillUnmount() {
+            AppState.removeEventListener("change", this.onAppStateChange);
+        }
+
+        onAppStateChange = (nextAppState: AppStateStatus) => {
+            const {appState} = this.state;
+            if (["inactive", "background"].includes(appState) && nextAppState === "active") {
+                app.logger.info("@@ACTIVE", {prevState: appState});
+            } else if (appState === "active" && ["inactive", "background"].includes(nextAppState)) {
+                app.logger.info("@@INACTIVE", {nextState: nextAppState});
+            }
+            this.setState({appState: nextAppState});
+        };
 
         render() {
             return (
@@ -64,6 +79,8 @@ function setupGlobalErrorHandler(errorListener: ErrorListener) {
 }
 
 function setupLogger(config: LoggerConfig | undefined) {
+    app.logger.info("@@ENTER", {});
+
     if (config) {
         app.loggerConfig = config;
         if (process.env.NODE_ENV === "production") {

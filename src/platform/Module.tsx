@@ -15,7 +15,7 @@ export interface ModuleLifecycleListener<RouteParam extends {} = {}> {
 }
 
 export class Module<ModuleState extends {}, RouteParam extends {} = {}, RootState extends State = State> implements ModuleLifecycleListener<RouteParam> {
-    public constructor(public readonly name: string, private readonly initialState: ModuleState) {}
+    constructor(readonly name: string, readonly initialState: ModuleState) {}
 
     *onEnter(routeParameters: RouteParam, path: string | null): SagaIterator {
         /**

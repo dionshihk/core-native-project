@@ -12,7 +12,7 @@ For each module, it contains **1 state** and **some actions**, to handle busines
 
 No matter sync or async, every action is automatically wrapped as saga generator.
 
-To extend module features, modules can also implement its own lifecycle actions, like onEnter/onDestroy/onActive etc.
+To extend module features, modules can also implement its own lifecycle actions, like onEnter/onDestroy/onActive/onBlur etc.
 
 ## Advanced Features
 

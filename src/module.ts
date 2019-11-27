@@ -22,7 +22,7 @@ export interface ErrorListener {
     onError: ErrorHandler;
 }
 
-type ActionCreator<H> = H extends (...args: infer P) => SagaIterator ? ((...args: P) => Action<P>) : never;
+type ActionCreator<H> = H extends (...args: infer P) => SagaIterator ? (...args: P) => Action<P> : never;
 type HandlerKeys<H> = {[K in keyof H]: H[K] extends (...args: any[]) => SagaIterator ? K : never}[Exclude<keyof H, keyof ModuleLifecycleListener | keyof ErrorListener>];
 export type ActionCreators<H> = {readonly [K in HandlerKeys<H>]: ActionCreator<H[K]>};
 
@@ -30,30 +30,29 @@ export function register<M extends Module<any>>(module: M): ModuleProxy<M> {
     const moduleName = module.name;
     if (!app.store.getState().app[moduleName]) {
         // To get private property
-        const initialState = (module as any).initialState;
-        app.store.dispatch(setStateAction(moduleName, initialState, `@@${moduleName}/@@init`));
+        app.store.dispatch(setStateAction(moduleName, module.initialState, `@@${moduleName}/@@init`));
     }
 
     // Transform every method into ActionCreator
     const actions: any = {};
     getKeys(module).forEach(actionType => {
-        const method = module[actionType];
-        const boundMethod = method.bind(module);
         // Attach action name, for @Log / error handler reflection
+        const method = module[actionType];
         const qualifiedActionType = `${moduleName}/${actionType}`;
-        boundMethod.actionName = method.actionName = qualifiedActionType;
+        method.actionName = qualifiedActionType;
         actions[actionType] = (...payload: any[]): Action<any[]> => ({type: qualifiedActionType, payload});
-        app.actionHandlers[qualifiedActionType] = boundMethod;
+
+        app.actionHandlers[qualifiedActionType] = method.bind(module);
     });
 
     return new ModuleProxy(module, actions);
 }
 
-export function* executeAction(handler: ActionHandler, ...payload: any[]): SagaIterator {
+export function* executeAction(actionName: string, handler: ActionHandler, ...payload: any[]): SagaIterator {
     try {
         yield* handler(...payload);
     } catch (error) {
-        yield put(errorAction(error, (handler as any).actionName));
+        yield put(errorAction(error, actionName));
     }
 }
 

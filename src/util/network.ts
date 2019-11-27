@@ -1,5 +1,5 @@
 import {APIException, NetworkConnectionException} from "../Exception";
-import {parseWithDate} from "./json";
+import {parseWithDate} from "./json-util";
 
 type RequestInterceptor = (request: RequestInit) => void | Promise<void>;
 type ResponseInterceptor = (response: Response) => void | Promise<void>;
@@ -68,7 +68,7 @@ export async function ajax<TRequest, TResponse>(method: string, path: string, pa
         if (e instanceof APIException) {
             throw e;
         } else {
-            console.info("Network Native Exception", e);
+            console.warn("Network native exception", e);
             throw new NetworkConnectionException(`failed to connect to ${requestURL}`, requestURL, e);
         }
     }
