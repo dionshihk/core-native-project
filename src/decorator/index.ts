@@ -1,8 +1,10 @@
 import {ActionHandler} from "../module";
+import {Module} from "../platform/Module";
 import {SagaIterator} from "redux-saga";
 import {State} from "../reducer";
 import {app} from "../app";
 import {stringifyWithMask} from "../util/json-util";
+import {Logger} from "../Logger";
 
 /**
  * For latest decorator spec, please ref following:
@@ -27,8 +29,8 @@ type VoidFunctionDecorator = (target: object, propertyKey: string, descriptor: T
 
 type ActionHandlerWithMetaData = ActionHandler & {actionName: string; maskedParams: string};
 
-type HandlerInterceptor<S> = (handler: ActionHandlerWithMetaData, rootState: Readonly<S>) => SagaIterator;
-type FunctionInterceptor<S> = (handler: () => void, rootState: Readonly<S>) => void;
+type HandlerInterceptor<RootState extends State = State, ModuleState extends {} = {}> = (handler: ActionHandlerWithMetaData, thisModule: Module<ModuleState, {}, RootState>) => SagaIterator;
+type FunctionInterceptor<S> = (handler: () => void, rootState: Readonly<S>, logger: Logger) => void;
 
 /**
  * A helper for ActionHandler functions (Saga).
@@ -38,13 +40,12 @@ export function createActionHandlerDecorator<S extends State = State>(intercepto
         const descriptor = target.descriptor;
         const fn: ActionHandler = descriptor.value;
         descriptor.value = function*(...args: any[]): SagaIterator {
-            const rootState: S = app.store.getState() as S;
             const boundFn: ActionHandlerWithMetaData = fn.bind(this, ...args) as any;
             // Do not use fn.actionName, it returns undefined
             // The reason is, fn is created before module register(), and the actionName had not been attached then
             boundFn.actionName = (descriptor.value as any).actionName;
             boundFn.maskedParams = stringifyWithMask(app.loggerConfig && app.loggerConfig.maskedKeywords ? app.loggerConfig.maskedKeywords : [], "***", ...args) || "[No Parameter]";
-            yield* interceptor(boundFn, rootState);
+            yield* interceptor(boundFn, this as any);
         };
         return target;
     };
@@ -59,7 +60,8 @@ export function createRegularDecorator<S extends State = State>(interceptor: Fun
         const fn = descriptor.value;
         descriptor.value = function(...args: any[]) {
             const rootState: S = app.store.getState() as S;
-            interceptor(fn.bind(this, ...args), rootState);
+            const logger = app.logger;
+            interceptor(fn.bind(this, ...args), rootState, logger);
         };
         return target;
     };
