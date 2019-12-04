@@ -64,15 +64,15 @@ export class Module<ModuleState extends {}, RouteParam extends {} = {}, RootStat
          */
     }
 
-    protected get state(): Readonly<ModuleState> {
+    get state(): Readonly<ModuleState> {
         return this.rootState.app[this.name];
     }
 
-    protected get rootState(): Readonly<RootState> {
+    get rootState(): Readonly<RootState> {
         return app.store.getState() as Readonly<RootState>;
     }
 
-    protected get logger(): Logger {
+    get logger(): Logger {
         return app.logger;
     }
 
@@ -81,7 +81,7 @@ export class Module<ModuleState extends {}, RouteParam extends {} = {}, RootStat
      * Do not use Partial<ModuleState> as parameter.
      * Because it allows {foo: undefined} to be passed, and set that field undefined, which is not supposed to be.
      */
-    protected setState<K extends keyof ModuleState>(newState: Pick<ModuleState, K> | ModuleState) {
+    setState<K extends keyof ModuleState>(newState: Pick<ModuleState, K> | ModuleState) {
         app.store.dispatch(setStateAction(this.name, newState, `@@${this.name}/setState[${Object.keys(newState).join(",")}]`));
     }
 }
