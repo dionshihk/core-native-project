@@ -96,7 +96,7 @@ export class LoggerImpl implements Logger {
             if (exception instanceof APIException) {
                 errorCode = `API_ERROR_${exception.statusCode}`;
                 // Following cases are treated as expected
-                if ([401, 403, 426, 503].includes(exception.statusCode)) {
+                if ([401, 403, 421, 426, 503].includes(exception.statusCode)) {
                     isWarning = true;
                 } else if (exception.statusCode === 400) {
                     if (exception.errorCode === "VALIDATION_ERROR") {
@@ -120,7 +120,6 @@ export class LoggerImpl implements Logger {
             } else if (exception instanceof RuntimeException) {
                 errorCode = "RUNTIME_ERROR";
                 info.errorObject = serializeError(exception.errorObject);
-                info.appState = JSON.stringify(app.store.getState().app);
             }
 
             return this.appendLog(isWarning ? "WARN" : "ERROR", {action, errorCode, errorMessage: exception.message, info, elapsedTime: 0});

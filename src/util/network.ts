@@ -51,15 +51,15 @@ export async function ajax<TRequest, TResponse>(method: string, path: string, pa
             return responseData as TResponse;
         } else {
             // Try to get server errorMessage from response
-            const errorMessage = responseData && responseData.message ? responseData.message : `failed to call ${requestURL}`;
-            const errorId = responseData && responseData.id ? responseData.id : null;
-            const errorCode = responseData && responseData.errorCode ? responseData.errorCode : null;
+            const errorId: string | null = responseData && responseData.id ? responseData.id : null;
+            const errorCode: string | null = responseData && responseData.errorCode ? responseData.errorCode : null;
 
             if (!errorId && (response.status === 502 || response.status === 504)) {
                 // Treat "cloud" error as Network Exception, e.g: gateway issue, load balancer unconnected to application server
                 // Note: Status 503 is maintenance
                 throw new NetworkConnectionException(`gateway error (${response.status})`, requestURL, {});
             } else {
+                const errorMessage: string = responseData && responseData.message ? responseData.message : `[No response message]`;
                 throw new APIException(errorMessage, response.status, requestURL, responseData, errorId, errorCode);
             }
         }

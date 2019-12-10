@@ -6,9 +6,8 @@ type OnTickHandlerDecorator = (target: object, propertyKey: "onTick", descriptor
  * For *onTick() action only, to specify to tick interval in second.
  */
 export function Interval(second: number): OnTickHandlerDecorator {
-    return (target: any) => {
-        const descriptor = target.descriptor;
-        descriptor.value.tickInterval = second;
-        return target;
+    return (target, propertyKey, descriptor) => {
+        descriptor.value!.tickInterval = second;
+        return descriptor;
     };
 }

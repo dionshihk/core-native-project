@@ -7,9 +7,8 @@ type LifecycleHandlerDecorator = (target: object, propertyKey: keyof ModuleLifec
  * Required decorator when using lifecycle actions, including onEnter/onDestroy/...
  */
 export function Lifecycle(): LifecycleHandlerDecorator {
-    return (target: any) => {
-        const descriptor = target.descriptor;
-        descriptor.value.isLifecycle = true;
-        return target;
+    return (target, propertyKey, descriptor) => {
+        descriptor.value!.isLifecycle = true;
+        return descriptor;
     };
 }
