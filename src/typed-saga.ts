@@ -19,11 +19,11 @@ export function* put<T extends Action<any>>(action: T): SagaGenerator<T> {
 }
 
 export function* race<T extends {}>(effects: StrictObject<T>): SagaGenerator<{[P in keyof T]?: UnwrapReturnType<T[P]>}> {
-    return yield rawRace(effects as any);
+    return yield rawRace(effects);
 }
 
 export function* all<T extends {}>(effects: StrictObject<T>): SagaGenerator<{[P in keyof T]: UnwrapReturnType<T[P]>}> {
-    return yield rawAll(effects as any);
+    return yield rawAll(effects);
 }
 
 export {spawn, delay};
