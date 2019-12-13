@@ -1,8 +1,8 @@
-import {SagaIterator} from "redux-saga";
 import {app} from "../app";
 import {Logger} from "../Logger";
 import {LifecycleDecoratorFlag, TickIntervalDecoratorFlag} from "../module";
 import {setStateAction, State} from "../reducer";
+import {SagaIterator} from "../typed-saga";
 
 export interface ModuleLifecycleListener<RouteParam extends {} = {}> {
     onEnter: ((routeParameters: RouteParam, path: string | null) => SagaIterator) & LifecycleDecoratorFlag;

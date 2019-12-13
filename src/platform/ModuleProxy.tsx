@@ -1,7 +1,7 @@
 import React from "react";
 import {AppState, AppStateStatus} from "react-native";
 import {NavigationEventSubscription, NavigationInjectedProps} from "react-navigation";
-import {SagaIterator, Task} from "redux-saga";
+import {Task} from "redux-saga";
 import {delay} from "redux-saga/effects";
 import {app} from "../app";
 import {ActionCreators, executeAction} from "../module";
@@ -95,7 +95,7 @@ export class ModuleProxy<M extends Module<any>> {
                 return <ComponentType {...this.props} />;
             }
 
-            private *lifecycleSaga(): SagaIterator {
+            private *lifecycleSaga() {
                 const props = this.props as NavigationInjectedProps | {};
 
                 const enterActionName = `${moduleName}/@@ENTER`;

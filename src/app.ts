@@ -1,6 +1,6 @@
 import {applyMiddleware, compose, createStore, Store, StoreEnhancer} from "redux";
 import createSagaMiddleware, {SagaMiddleware} from "redux-saga";
-import {takeEvery, takeLeading} from "redux-saga/effects";
+import {takeEvery} from "redux-saga/effects";
 import {LoggerImpl, LoggerConfig} from "./Logger";
 import {ActionHandler, ErrorHandler, executeAction} from "./module";
 import {Action, ERROR_ACTION_TYPE, ExceptionPayload, LOADING_ACTION, rootReducer, State} from "./reducer";
