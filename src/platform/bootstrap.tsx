@@ -84,29 +84,27 @@ function setupLogger(config: LoggerConfig | undefined) {
 
     if (config) {
         app.loggerConfig = config;
-        if (process.env.NODE_ENV === "production") {
-            app.sagaMiddleware.run(function*() {
-                while (true) {
-                    yield delay(config.sendingFrequency * 1000);
-                    try {
-                        const logs = app.logger.collect();
-                        if (logs.length > 0) {
-                            yield call(ajax, "POST", config.serverURL, {}, {events: logs});
-                            app.logger.empty();
-                        }
-                    } catch (e) {
-                        if (e instanceof NetworkConnectionException) {
-                            // Log this case and retry later
-                            app.logger.exception(e, "@@framework/logger");
-                        } else {
-                            // If not network error, retry always leads to same error, so have to give up
-                            const length = app.logger.collect().length;
-                            app.logger.empty();
-                            app.logger.exception(e, "@@framework/logger", {droppedLogs: length.toString()});
-                        }
+        app.sagaMiddleware.run(function*() {
+            while (true) {
+                yield delay(config.sendingFrequency * 1000);
+                try {
+                    const logs = app.logger.collect();
+                    if (logs.length > 0) {
+                        yield call(ajax, "POST", config.serverURL, {}, {events: logs});
+                        app.logger.empty();
+                    }
+                } catch (e) {
+                    if (e instanceof NetworkConnectionException) {
+                        // Log this case and retry later
+                        app.logger.exception(e, "@@framework/logger");
+                    } else {
+                        // If not network error, retry always leads to same error, so have to give up
+                        const length = app.logger.collect().length;
+                        app.logger.empty();
+                        app.logger.exception(e, "@@framework/logger", {droppedLogs: length.toString()});
                     }
                 }
-            });
-        }
+            }
+        });
     }
 }
