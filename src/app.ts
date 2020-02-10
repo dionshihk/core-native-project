@@ -16,6 +16,8 @@ interface App {
     loggerConfig: LoggerConfig | null;
 }
 
+export const app = createApp();
+
 function composeWithDevTools(enhancer: StoreEnhancer): StoreEnhancer {
     let composeEnhancers = compose;
     if (process.env.NODE_ENV !== "production") {
@@ -81,5 +83,3 @@ function createApp(): App {
         loggerConfig: null,
     };
 }
-
-export const app = createApp();
