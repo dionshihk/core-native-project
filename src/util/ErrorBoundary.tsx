@@ -12,16 +12,9 @@ interface State {
     exception: ReactLifecycleException | null;
 }
 
-class Component extends React.PureComponent<Props, State> {
+class ErrorBoundary extends React.PureComponent<Props, State> {
     static defaultProps: Pick<Props, "render"> = {render: () => null};
     state: State = {exception: null};
-
-    componentDidUpdate(prevProps: Props) {
-        // Support page recovery
-        if (this.props.children !== prevProps.children) {
-            this.setState({exception: null});
-        }
-    }
 
     componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
         const exception = new ReactLifecycleException(error.name + ": " + error.message, errorInfo.componentStack);
@@ -34,4 +27,4 @@ class Component extends React.PureComponent<Props, State> {
     }
 }
 
-export const ErrorBoundary = connect()(Component);
+export default connect()(ErrorBoundary);
