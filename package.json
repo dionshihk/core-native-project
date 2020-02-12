@@ -1,6 +1,6 @@
 {
   "name": "core-native",
-  "version": "1.6.6",
+  "version": "1.6.7",
   "main": "lib/index.js",
   "module": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -29,7 +29,7 @@
     "yargs": "15.1.0"
   },
   "dependencies": {
-    "@types/node": "13.7.0",
+    "@types/node": "13.7.1",
     "@types/react": "*",
     "@types/react-native": "0.61.12",
     "@types/react-navigation": "3.4.0",
@@ -41,7 +41,7 @@
     "tslib": "1.10.0"
   },
   "peerDependencies": {
-    "@types/node": "13.7.0",
+    "@types/node": "13.7.1",
     "@types/react": "*",
     "@types/react-native": "0.61.12",
     "@types/react-navigation": "3.4.0",
