@@ -1,3 +1,16 @@
+/**
+ * Attention:
+ * Do not use "axios" for network utils in React Native.
+ *
+ * Explanation:
+ * 1) Axios supports [nodejs-http] and [XHR] only, does not support [fetch] API.
+ * 2) Although React Native has a XHR-same interface, but it has a bit difference on CORS policy.
+ * 3) If XHR is used in React Native (i.e, what axios does), customized response header cannot be retrieved.
+ *
+ * Ref:
+ * https://stackoverflow.com/questions/37897523/axios-get-access-to-response-header-fields
+ */
+
 import {APIException, NetworkConnectionException} from "../Exception";
 import {parseWithDate} from "./json-util";
 
