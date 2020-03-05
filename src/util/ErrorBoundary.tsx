@@ -1,24 +1,30 @@
 import React from "react";
 import {connect, DispatchProp} from "react-redux";
-import {ReactLifecycleException} from "../Exception";
-import {errorAction} from "../reducer";
+import {Exception} from "../Exception";
+import {captureError} from "./error-util";
 
-interface Props extends DispatchProp<any> {
-    render: (exception: ReactLifecycleException) => React.ReactNode;
+interface OwnProps {
+    render: (exception: Exception) => React.ReactNode;
     children: React.ReactNode;
 }
 
+interface Props extends OwnProps, DispatchProp {}
+
 interface State {
-    exception: ReactLifecycleException | null;
+    exception: Exception | null;
 }
 
 class ErrorBoundary extends React.PureComponent<Props, State> {
+    static displayName = "ErrorBoundary";
     static defaultProps: Pick<Props, "render"> = {render: () => null};
-    state: State = {exception: null};
+
+    constructor(props: Props) {
+        super(props);
+        this.state = {exception: null};
+    }
 
     componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-        const exception = new ReactLifecycleException(error.name + ": " + error.message, errorInfo.componentStack);
-        this.props.dispatch(errorAction(exception));
+        const exception = captureError(error, {triggeredBy: "error-boundary", extraStacktrace: errorInfo.componentStack});
         this.setState({exception});
     }
 

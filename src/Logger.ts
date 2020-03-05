@@ -1,25 +1,24 @@
-import {app} from "./app";
-import {APIException, Exception, NetworkConnectionException, ReactLifecycleException, RuntimeException} from "./Exception";
 import {loggerContext} from "./platform/logger-context";
-import {serializeError} from "./util/error-util";
+import {errorToException} from "./util/error-util";
+import {APIException, Exception, JavaScriptException, NetworkConnectionException} from "./Exception";
 
 interface Log {
     date: Date;
     result: "OK" | "WARN" | "ERROR";
     elapsedTime: number;
     context: {[key: string]: string}; // To store indexed data (for Elastic Search)
-    info: {[key: string]: string}; // To store text data (no index)
+    info: {[key: string]: string | undefined}; // To store text data (no index)
     action?: string;
     errorCode?: string;
     errorMessage?: string;
 }
 
 interface ErrorLogEntry {
-    elapsedTime: number;
     action: string;
+    elapsedTime: number;
     errorCode: string;
     errorMessage: string;
-    info: {[key: string]: string};
+    info: {[key: string]: string | undefined};
 }
 
 /**
@@ -69,61 +68,54 @@ export class LoggerImpl implements Logger {
     }
 
     info(action: string, info: {[key: string]: string}, elapsedTime?: number): void {
-        return this.appendLog("OK", {action, info, elapsedTime: elapsedTime || 0});
+        this.appendLog("OK", {action, info, elapsedTime: elapsedTime || 0});
     }
 
     warn(data: ErrorLogEntry): void {
-        return this.appendLog("WARN", data);
+        this.appendLog("WARN", data);
     }
 
     error(data: ErrorLogEntry): void {
-        return this.appendLog("ERROR", data);
+        this.appendLog("ERROR", data);
     }
 
-    exception(exception: Exception, action?: string, extraInfo?: {[key: string]: string}): void {
+    exception(exception: Exception, extra: {[key: string]: string | undefined}, action?: string): void {
+        let isWarning: boolean;
+        let errorCode: string;
+        const info: {[key: string]: string | undefined} = {...extra};
+
         if (exception instanceof NetworkConnectionException) {
-            const info: {[key: string]: string} = {
-                ...extraInfo,
-                url: exception.requestURL,
-                originalErrorMessage: exception.originalErrorMessage,
-            };
-            return this.appendLog("WARN", {action, errorCode: "NETWORK_FAILURE", errorMessage: exception.message, info, elapsedTime: 0});
-        } else {
-            const info: {[key: string]: string} = {...extraInfo};
-            let isWarning: boolean = false;
-            let errorCode: string = "OTHER_ERROR";
-
-            if (exception instanceof APIException) {
+            isWarning = true;
+            errorCode = "NETWORK_FAILURE";
+            info["requestURL"] = exception.requestURL;
+            info["originalErrorMessage"] = exception.originalErrorMessage;
+        } else if (exception instanceof APIException) {
+            if (exception.statusCode === 400 && exception.errorCode === "VALIDATION_ERROR") {
+                isWarning = false;
+                errorCode = "API_VALIDATION_ERROR";
+            } else {
+                isWarning = true;
                 errorCode = `API_ERROR_${exception.statusCode}`;
-                // Following cases are not treated as frontend issues
-                if ([401, 403, 404, 410, 421, 426, 500, 503].includes(exception.statusCode)) {
-                    isWarning = true;
-                } else if (exception.statusCode === 400) {
-                    if (exception.errorCode === "VALIDATION_ERROR") {
-                        errorCode = "API_VALIDATION_ERROR";
-                    } else {
-                        isWarning = true;
-                    }
-                }
-
-                info.requestURL = exception.requestURL;
-                if (exception.errorCode) {
-                    info.errorCode = exception.errorCode;
-                }
-                if (exception.errorId) {
-                    info.errorId = exception.errorId;
-                }
-            } else if (exception instanceof ReactLifecycleException) {
-                errorCode = "LIFECYCLE_ERROR";
-                info.stackTrace = exception.componentStack;
-                info.appState = JSON.stringify(app.store.getState().app);
-            } else if (exception instanceof RuntimeException) {
-                errorCode = "RUNTIME_ERROR";
-                info.errorObject = serializeError(exception.errorObject);
             }
-
-            return this.appendLog(isWarning ? "WARN" : "ERROR", {action, errorCode, errorMessage: exception.message, info, elapsedTime: 0});
+            info["requestURL"] = exception.requestURL;
+            info["responseData"] = JSON.stringify(exception.responseData);
+            if (exception.errorId) {
+                info["apiErrorId"] = exception.errorId;
+            }
+            if (exception.errorCode) {
+                info["apiErrorCode"] = exception.errorCode;
+            }
+        } else if (exception instanceof JavaScriptException) {
+            isWarning = false;
+            errorCode = "JAVASCRIPT_ERROR";
+        } else {
+            console.warn("[framework] Exception class should not be extended, throw Error instead");
+            isWarning = false;
+            errorCode = "JAVASCRIPT_ERROR";
         }
+
+        // isWarning = isWarning || !shouldAlertToUser(exception.message);
+        this.appendLog(isWarning ? "WARN" : "ERROR", {action, errorCode, errorMessage: exception.message, info, elapsedTime: 0});
     }
 
     collect(): Log[] {
@@ -134,20 +126,19 @@ export class LoggerImpl implements Logger {
         this.logQueue = [];
     }
 
-    private appendLog(result: "OK" | "WARN" | "ERROR", data: Pick<Log, "action" | "info" | "errorCode" | "errorMessage" | "elapsedTime">) {
+    appendLog(result: "OK" | "WARN" | "ERROR", data: Pick<Log, "action" | "info" | "errorCode" | "errorMessage" | "elapsedTime">) {
         const completeContext = {};
         Object.entries(this.environmentContext).map(([key, value]) => {
             if (typeof value === "string") {
                 completeContext[key] = value.substr(0, 1000);
             } else {
-                let evaluatedResult: string;
                 try {
-                    evaluatedResult = value();
+                    completeContext[key] = value();
                 } catch (e) {
-                    evaluatedResult = "[ERROR] " + serializeError(e);
-                    console.warn("Fail to execute logger context: " + serializeError(e));
+                    const message = errorToException(e).message;
+                    completeContext[key] = "[error] " + message;
+                    console.warn("[framework] Fail to execute logger context: " + message);
                 }
-                completeContext[key] = evaluatedResult.substr(0, 1000);
             }
         });
 

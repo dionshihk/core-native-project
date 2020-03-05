@@ -8,7 +8,7 @@ export {ajax, setRequestInterceptor, setResponseInterceptor} from "./util/networ
 export {default as ErrorBoundary} from "./util/ErrorBoundary";
 
 export {createActionHandlerDecorator, createRegularDecorator, Loading, Interval, Mutex, RetryOnNetworkConnectionError, SilentOnNetworkConnectionError, TimeLimit, Lifecycle, Log} from "./decorator";
-export {Exception, APIException, NetworkConnectionException, RuntimeException, ReactLifecycleException} from "./Exception";
+export {Exception, APIException, NetworkConnectionException} from "./Exception";
 export {showLoading, loadingAction, State} from "./reducer";
 export {register, ErrorListener} from "./module";
 export {useLoadingStatus, useModuleAction} from "./hooks";

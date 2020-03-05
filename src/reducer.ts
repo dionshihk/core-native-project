@@ -1,5 +1,4 @@
 import {Action as ReduxAction, combineReducers, Reducer} from "redux";
-import {Exception, RuntimeException} from "./Exception";
 
 // Redux State
 interface LoadingState {
@@ -67,26 +66,6 @@ function loadingReducer(state: LoadingState = {}, action: Action<LoadingActionPa
         };
     }
     return state;
-}
-
-// Redux Action: Error (handled by saga)
-export interface ExceptionPayload {
-    exception: Exception;
-    actionName?: string;
-}
-
-export const ERROR_ACTION_TYPE: string = "@@framework/error";
-
-export function errorAction(error: any, actionName?: string): Action<ExceptionPayload> {
-    if (process.env.NODE_ENV === "development") {
-        console.warn("Error Caught:", error);
-    }
-
-    const exception: Exception = error instanceof Exception ? error : new RuntimeException(error && error.message ? error.message : "unknown error", error);
-    return {
-        type: ERROR_ACTION_TYPE,
-        payload: {exception, actionName},
-    };
 }
 
 // Root Reducer

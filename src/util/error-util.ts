@@ -1,15 +1,54 @@
-export function serializeError(errorObject: any): string {
-    if (errorObject) {
-        const jsonString = JSON.stringify(errorObject);
-        let message = typeof errorObject.toString === "function" ? errorObject.toString() + "\n" : "";
-        if (jsonString.length > 300) {
-            // Over-long message may lead to Chrome crash, or server-side drop request
-            message += jsonString.substr(0, 300) + "...";
-        } else {
-            message += jsonString;
-        }
-        return message;
+import {Exception, JavaScriptException} from "../Exception";
+import {ErrorHandler} from "../module";
+import {app} from "../app";
+
+interface ErrorExtra {
+    triggeredBy: "detached-saga" | "saga" | "error-boundary" | "promise-rejection" | "global";
+    severity?: "fatal";
+    actionPayload?: string; // Should be masked
+    extraStacktrace?: string;
+}
+
+export function errorToException(error: any): Exception {
+    if (error instanceof Exception) {
+        return error;
+    } else if (error instanceof Error) {
+        return new JavaScriptException(error.message);
     } else {
-        return "[NULL]";
+        try {
+            const errorMessage = JSON.stringify(error);
+            return new JavaScriptException(errorMessage);
+        } catch (e) {
+            return new JavaScriptException("[Unknown Error]");
+        }
+    }
+}
+
+export function captureError(error: any, extra: ErrorExtra, action?: string): Exception {
+    if (process.env.NODE_ENV === "development") {
+        console.error(`[framework] Error captured from [${extra.triggeredBy}]`, error);
+    }
+
+    const exception = errorToException(error);
+    const errorStacktrace = error instanceof Error ? error.stack : undefined;
+    const info = {...extra, stacktrace: errorStacktrace};
+
+    app.logger.exception(exception, info, action);
+    app.sagaMiddleware.run(runUserErrorHandler, app.errorHandler, exception);
+
+    return exception;
+}
+
+let isUserErrorHandlerRunning = false;
+export function* runUserErrorHandler(handler: ErrorHandler, exception: Exception) {
+    if (isUserErrorHandlerRunning) return;
+
+    try {
+        isUserErrorHandlerRunning = true;
+        yield* handler(exception);
+    } catch (e) {
+        console.warn("[framework] Fail to execute user-defined error handler", e);
+    } finally {
+        isUserErrorHandlerRunning = false;
     }
 }

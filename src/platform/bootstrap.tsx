@@ -5,10 +5,10 @@ import {app} from "../app";
 import {LoggerConfig} from "../Logger";
 import {ErrorListener} from "../module";
 import {call, delay} from "redux-saga/effects";
-import {errorAction} from "../reducer";
 import ErrorBoundary from "../util/ErrorBoundary";
 import {ajax} from "../util/network";
-import {NetworkConnectionException} from "../Exception";
+import {Exception, NetworkConnectionException} from "../Exception";
+import {captureError} from "../util/error-util";
 
 interface BootstrapOption {
     registeredAppName: string;
@@ -69,13 +69,7 @@ function renderApp(registeredAppName: string, EntryComponent: ComponentType<{}>,
 }
 
 function setupGlobalErrorHandler(errorListener: ErrorListener) {
-    ErrorUtils.setGlobalHandler(async (error, isFatal) => {
-        if (isFatal) {
-            console.info("***** Fatal Error *****");
-        }
-        app.store.dispatch(errorAction(error));
-    });
-
+    ErrorUtils.setGlobalHandler((error, isFatal) => captureError(error, {triggeredBy: "global", severity: isFatal ? "fatal" : undefined}));
     app.errorHandler = errorListener.onError.bind(errorListener);
 }
 
@@ -96,12 +90,12 @@ function setupLogger(config: LoggerConfig | undefined) {
                 } catch (e) {
                     if (e instanceof NetworkConnectionException) {
                         // Log this case and retry later
-                        app.logger.exception(e, "@@framework/logger");
-                    } else {
+                        app.logger.exception(e, {}, "@@framework/logger");
+                    } else if (e instanceof Exception) {
                         // If not network error, retry always leads to same error, so have to give up
                         const length = app.logger.collect().length;
                         app.logger.empty();
-                        app.logger.exception(e, "@@framework/logger", {droppedLogs: length.toString()});
+                        app.logger.exception(e, {droppedLogs: length.toString()}, "@@framework/logger");
                     }
                 }
             }

@@ -68,7 +68,7 @@ export async function ajax<TRequest, TResponse>(method: string, path: string, pa
         if (e instanceof APIException) {
             throw e;
         } else {
-            console.warn("Network native exception", e);
+            console.warn("[framework] Network native exception", e);
             throw new NetworkConnectionException(`failed to connect to ${requestURL}`, requestURL, e ? e.message : "-");
         }
     }
