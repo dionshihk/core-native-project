@@ -1,6 +1,6 @@
 {
   "name": "core-native",
-  "version": "1.7.1",
+  "version": "1.7.2",
   "main": "lib/index.js",
   "module": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -34,7 +34,6 @@
     "@types/react-native": "0.61.19",
     "@types/react-navigation": "3.4.0",
     "@types/react-redux": "7.1.7",
-    "axios": "0.19.2",
     "react": "16.12.0",
     "react-redux": "7.2.0",
     "redux": "4.0.5",
@@ -47,7 +46,6 @@
     "@types/react-native": "0.61.19",
     "@types/react-navigation": "3.4.0",
     "@types/react-redux": "7.1.7",
-    "axios": "0.19.2",
     "react": "16.12.0",
     "react-redux": "7.2.0",
     "redux": "4.0.5",
