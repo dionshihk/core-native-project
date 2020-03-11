@@ -69,7 +69,7 @@ function renderApp(registeredAppName: string, EntryComponent: ComponentType<{}>,
 }
 
 function setupGlobalErrorHandler(errorListener: ErrorListener) {
-    ErrorUtils.setGlobalHandler((error, isFatal) => captureError(error, {triggeredBy: "global", severity: isFatal ? "fatal" : undefined}));
+    ErrorUtils.setGlobalHandler((error, isFatal) => captureError(error, "@@framework/global", {severity: isFatal ? "fatal" : undefined}));
     app.errorHandler = errorListener.onError.bind(errorListener);
 }
 

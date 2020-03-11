@@ -36,7 +36,7 @@ function composeWithDevTools(enhancer: StoreEnhancer): StoreEnhancer {
 function createApp(): App {
     const eventLogger = new LoggerImpl();
     const sagaMiddleware = createSagaMiddleware({
-        onError: (error, info) => captureError(error, {triggeredBy: "detached-saga", extraStacktrace: info.sagaStack}),
+        onError: (error, info) => captureError(error, "@@framework/detached-saga", {extraStacktrace: info.sagaStack}),
     });
     const store: Store<State> = createStore(rootReducer(), composeWithDevTools(applyMiddleware(sagaMiddleware)));
     sagaMiddleware.run(function*() {
