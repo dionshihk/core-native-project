@@ -24,7 +24,7 @@ export class ModuleProxy<M extends Module<any>> {
             // Copy static navigation options, important for navigator
             static navigationOptions = (ComponentType as any).navigationOptions;
 
-            private readonly lifecycleSagaTask: Task;
+            private lifecycleSagaTask: Task | null = null;
             private focusSubscription: NavigationEventSubscription | undefined;
             private blurSubscription: NavigationEventSubscription | undefined;
             private successTickCount: number = 0;
@@ -33,10 +33,11 @@ export class ModuleProxy<M extends Module<any>> {
             constructor(props: P) {
                 super(props);
                 this.state = {appState: AppState.currentState};
-                this.lifecycleSagaTask = app.sagaMiddleware.run(this.lifecycleSaga.bind(this));
             }
 
             componentDidMount() {
+                this.lifecycleSagaTask = app.sagaMiddleware.run(this.lifecycleSaga.bind(this));
+
                 // According to the document, this API may change soon
                 // Ref: https://facebook.github.io/react-native/docs/appstate#addeventlistener
                 AppState.addEventListener("change", this.onAppStateChange);
@@ -70,7 +71,7 @@ export class ModuleProxy<M extends Module<any>> {
                 }
                 AppState.removeEventListener("change", this.onAppStateChange);
 
-                this.lifecycleSagaTask.cancel();
+                this.lifecycleSagaTask?.cancel();
                 app.logger.info(`${moduleName}/@@DESTROY`, {
                     successTickCount: this.successTickCount.toString(),
                     stayingSecond: ((Date.now() - this.mountedTime) / 1000).toFixed(2),
