@@ -117,7 +117,7 @@ export class ModuleProxy<M extends Module<any>> {
                 } else {
                     app.logger.info(enterActionName, {componentProps: JSON.stringify(props)});
                 }
-                if (this.lifecycleSagaTask.isCancelled()) {
+                if (this.lifecycleSagaTask?.isCancelled()) {
                     return;
                 }
 
@@ -128,7 +128,7 @@ export class ModuleProxy<M extends Module<any>> {
                     while (true) {
                         yield* executeAction(tickActionName, boundTicker);
                         this.successTickCount++;
-                        if (this.lifecycleSagaTask.isCancelled()) {
+                        if (this.lifecycleSagaTask?.isCancelled()) {
                             return;
                         }
                         yield delay(tickIntervalInMillisecond);
