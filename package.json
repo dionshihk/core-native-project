@@ -1,6 +1,6 @@
 {
   "name": "core-native",
-  "version": "1.7.3",
+  "version": "1.7.4",
   "main": "lib/index.js",
   "module": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -26,15 +26,15 @@
     "prettier": "1.19.1",
     "ts-jest": "25.2.1",
     "typescript": "3.8.3",
-    "yargs": "15.1.0"
+    "yargs": "15.3.0"
   },
   "dependencies": {
     "@types/node": "13.9.0",
     "@types/react": "*",
-    "@types/react-native": "0.61.20",
+    "@types/react-native": "0.61.21",
     "@types/react-navigation": "3.4.0",
     "@types/react-redux": "7.1.7",
-    "react": "16.12.0",
+    "react": "16.13.0",
     "react-redux": "7.2.0",
     "redux": "4.0.5",
     "redux-saga": "1.1.3",
@@ -43,10 +43,10 @@
   "peerDependencies": {
     "@types/node": "13.9.0",
     "@types/react": "*",
-    "@types/react-native": "0.61.20",
+    "@types/react-native": "0.61.21",
     "@types/react-navigation": "3.4.0",
     "@types/react-redux": "7.1.7",
-    "react": "16.12.0",
+    "react": "16.13.0",
     "react-redux": "7.2.0",
     "redux": "4.0.5",
     "redux-saga": "1.1.3",

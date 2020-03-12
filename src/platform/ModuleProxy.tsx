@@ -96,6 +96,13 @@ export class ModuleProxy<M extends Module<any>> {
             }
 
             private *lifecycleSaga() {
+                /**
+                 * CAVEAT:
+                 * If lifecycleSagaTask is cancelled during executeAction,
+                 * It will only cancel the action (onRender/onTick...) itself, but proceeds with following code.
+                 * That's why we need to check this.lifecycleSagaTask.isCancelled() after each lifecycle action.
+                 * https://github.com/redux-saga/redux-saga/issues/1986
+                 */
                 const props = this.props as NavigationInjectedProps | {};
 
                 const enterActionName = `${moduleName}/@@ENTER`;
@@ -110,6 +117,9 @@ export class ModuleProxy<M extends Module<any>> {
                 } else {
                     app.logger.info(enterActionName, {componentProps: JSON.stringify(props)});
                 }
+                if (this.lifecycleSagaTask.isCancelled()) {
+                    return;
+                }
 
                 if (lifecycleListener.onTick.isLifecycle) {
                     const tickIntervalInMillisecond = (lifecycleListener.onTick.tickInterval || 5) * 1000;
@@ -118,6 +128,9 @@ export class ModuleProxy<M extends Module<any>> {
                     while (true) {
                         yield* executeAction(tickActionName, boundTicker);
                         this.successTickCount++;
+                        if (this.lifecycleSagaTask.isCancelled()) {
+                            return;
+                        }
                         yield delay(tickIntervalInMillisecond);
                     }
                 }
