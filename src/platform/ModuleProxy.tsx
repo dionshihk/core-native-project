@@ -2,7 +2,7 @@ import React from "react";
 import {AppState, AppStateStatus} from "react-native";
 import {NavigationEventSubscription, NavigationInjectedProps} from "react-navigation";
 import {Task} from "redux-saga";
-import {delay} from "redux-saga/effects";
+import {delay, call as rawCall} from "redux-saga/effects";
 import {app} from "../app";
 import {ActionCreators, executeAction} from "../module";
 import {Module, ModuleLifecycleListener} from "./Module";
@@ -99,9 +99,9 @@ export class ModuleProxy<M extends Module<any>> {
             private *lifecycleSaga() {
                 /**
                  * CAVEAT:
-                 * If lifecycleSagaTask is cancelled during executeAction,
-                 * It will only cancel the action (onRender/onTick...) itself, but proceeds with following code.
-                 * That's why we need to check this.lifecycleSagaTask.isCancelled() after each lifecycle action.
+                 * Do not use <yield* executeAction> for lifecycle actions.
+                 * It will lead to cancellation issue, which cannot stop the lifecycleSaga as expected.
+                 *
                  * https://github.com/redux-saga/redux-saga/issues/1986
                  */
                 const props = this.props as NavigationInjectedProps | {};
@@ -110,9 +110,9 @@ export class ModuleProxy<M extends Module<any>> {
                 if (lifecycleListener.onEnter.isLifecycle) {
                     const startTime = Date.now();
                     if ("navigation" in props) {
-                        yield* executeAction(enterActionName, lifecycleListener.onEnter.bind(lifecycleListener), props.navigation.state.params, props.navigation.state.path || null);
+                        yield rawCall(executeAction, enterActionName, lifecycleListener.onEnter.bind(lifecycleListener), props.navigation.state.params, props.navigation.state.path || null);
                     } else {
-                        yield* executeAction(enterActionName, lifecycleListener.onEnter.bind(lifecycleListener), {}, null);
+                        yield rawCall(executeAction, enterActionName, lifecycleListener.onEnter.bind(lifecycleListener), {}, null);
                     }
                     app.logger.info(enterActionName, {componentProps: JSON.stringify(props)}, Date.now() - startTime);
                 } else {
@@ -127,7 +127,7 @@ export class ModuleProxy<M extends Module<any>> {
                     const boundTicker = lifecycleListener.onTick.bind(lifecycleListener);
                     const tickActionName = `${moduleName}/@@TICK`;
                     while (true) {
-                        yield* executeAction(tickActionName, boundTicker);
+                        yield rawCall(executeAction, tickActionName, boundTicker);
                         this.successTickCount++;
                         if (this.lifecycleSagaTask?.isCancelled()) {
                             return;

@@ -13,3 +13,4 @@ export {showLoading, loadingAction, State} from "./reducer";
 export {register, ErrorListener} from "./module";
 export {useLoadingStatus, useModuleAction} from "./hooks";
 export {SagaIterator, call, put, spawn, delay, race, all} from "./typed-saga";
+export {logger} from "./app";

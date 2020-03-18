@@ -1,6 +1,6 @@
 {
   "name": "core-native",
-  "version": "1.7.6",
+  "version": "1.7.7",
   "main": "lib/index.js",
   "module": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -16,8 +16,8 @@
   },
   "devDependencies": {
     "@types/jest": "25.1.4",
-    "@typescript-eslint/eslint-plugin": "2.23.0",
-    "@typescript-eslint/parser": "2.23.0",
+    "@typescript-eslint/eslint-plugin": "2.24.0",
+    "@typescript-eslint/parser": "2.24.0",
     "chalk": "3.0.0",
     "eslint": "6.8.0",
     "eslint-config-prettier": "6.10.0",
@@ -26,12 +26,12 @@
     "prettier": "1.19.1",
     "ts-jest": "25.2.1",
     "typescript": "3.8.3",
-    "yargs": "15.3.0"
+    "yargs": "15.3.1"
   },
   "dependencies": {
-    "@types/node": "13.9.0",
+    "@types/node": "13.9.1",
     "@types/react": "*",
-    "@types/react-native": "0.61.21",
+    "@types/react-native": "0.61.22",
     "@types/react-navigation": "3.4.0",
     "@types/react-redux": "7.1.7",
     "react": "16.13.0",
@@ -41,9 +41,9 @@
     "tslib": "1.11.1"
   },
   "peerDependencies": {
-    "@types/node": "13.9.0",
+    "@types/node": "13.9.1",
     "@types/react": "*",
-    "@types/react-native": "0.61.21",
+    "@types/react-native": "0.61.22",
     "@types/react-navigation": "3.4.0",
     "@types/react-redux": "7.1.7",
     "react": "16.13.0",

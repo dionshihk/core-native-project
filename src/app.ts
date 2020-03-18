@@ -1,7 +1,7 @@
 import {applyMiddleware, compose, createStore, Store, StoreEnhancer} from "redux";
 import createSagaMiddleware, {SagaMiddleware} from "redux-saga";
 import {takeEvery} from "redux-saga/effects";
-import {LoggerImpl, LoggerConfig} from "./Logger";
+import {LoggerImpl, LoggerConfig, Logger} from "./Logger";
 import {ActionHandler, ErrorHandler, executeAction} from "./module";
 import {Action, LOADING_ACTION, rootReducer, State} from "./reducer";
 import {captureError} from "./util/error-util";
@@ -18,6 +18,7 @@ interface App {
 }
 
 export const app = createApp();
+export const logger: Logger = app.logger;
 
 function composeWithDevTools(enhancer: StoreEnhancer): StoreEnhancer {
     let composeEnhancers = compose;
