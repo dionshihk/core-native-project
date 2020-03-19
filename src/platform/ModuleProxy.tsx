@@ -71,11 +71,11 @@ export class ModuleProxy<M extends Module<any>> {
                 }
                 AppState.removeEventListener("change", this.onAppStateChange);
 
-                this.lifecycleSagaTask?.cancel();
                 app.logger.info(`${moduleName}/@@DESTROY`, {
                     successTickCount: this.successTickCount.toString(),
                     stayingSecond: ((Date.now() - this.mountedTime) / 1000).toFixed(2),
                 });
+                this.lifecycleSagaTask?.cancel();
             }
 
             onAppStateChange = (nextAppState: AppStateStatus) => {
