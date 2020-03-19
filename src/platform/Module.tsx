@@ -5,7 +5,7 @@ import {setStateAction, State} from "../reducer";
 import {SagaIterator} from "../typed-saga";
 
 export interface ModuleLifecycleListener<RouteParam extends {} = {}> {
-    onEnter: ((routeParameters: RouteParam, path: string | null) => SagaIterator) & LifecycleDecoratorFlag;
+    onEnter: ((routeParameters: RouteParam) => SagaIterator) & LifecycleDecoratorFlag;
     onDestroy: (() => SagaIterator) & LifecycleDecoratorFlag;
     onTick: (() => SagaIterator) & LifecycleDecoratorFlag & TickIntervalDecoratorFlag;
     onAppActive: (() => SagaIterator) & LifecycleDecoratorFlag;
@@ -17,10 +17,11 @@ export interface ModuleLifecycleListener<RouteParam extends {} = {}> {
 export class Module<ModuleState extends {}, RouteParam extends {} = {}, RootState extends State = State> implements ModuleLifecycleListener<RouteParam> {
     constructor(readonly name: string, readonly initialState: ModuleState) {}
 
-    *onEnter(routeParameters: RouteParam, path: string | null): SagaIterator {
+    *onEnter(routeParameters: RouteParam): SagaIterator {
         /**
          * Called when the attached component is mounted.
-         * The routeParameters and path are specified if the component is connected to React Navigator.
+         * The routeParameters is auto specified if the component is connected to React Navigator.
+         * Otherwise, routeParameters will be {}.
          */
     }
 
