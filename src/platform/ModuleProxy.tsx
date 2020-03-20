@@ -125,9 +125,6 @@ export class ModuleProxy<M extends Module<any>> {
                 } else {
                     app.logger.info(enterActionName, {componentProps: JSON.stringify(props)});
                 }
-                if (this.lifecycleSagaTask?.isCancelled()) {
-                    return;
-                }
 
                 if (lifecycleListener.onTick.isLifecycle) {
                     const tickIntervalInMillisecond = (lifecycleListener.onTick.tickInterval || 5) * 1000;
@@ -136,9 +133,6 @@ export class ModuleProxy<M extends Module<any>> {
                     while (true) {
                         yield rawCall(executeAction, tickActionName, boundTicker);
                         this.successTickCount++;
-                        if (this.lifecycleSagaTask?.isCancelled()) {
-                            return;
-                        }
                         yield delay(tickIntervalInMillisecond);
                     }
                 }
