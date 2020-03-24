@@ -40,8 +40,8 @@ function createApp(): App {
         onError: (error, info) => captureError(error, "@@framework/detached-saga", {extraStacktrace: info.sagaStack}),
     });
     const store: Store<State> = createStore(rootReducer(), composeWithDevTools(applyMiddleware(sagaMiddleware)));
-    sagaMiddleware.run(function*() {
-        yield takeEvery("*", function*(action: Action<any>) {
+    sagaMiddleware.run(function* () {
+        yield takeEvery("*", function* (action: Action<any>) {
             const handler = app.actionHandlers[action.type];
             if (handler) {
                 // eslint-disable-next-line @typescript-eslint/ban-ts-ignore

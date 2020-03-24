@@ -32,7 +32,7 @@ type FunctionInterceptor<S> = (handler: () => void, rootState: Readonly<S>, logg
 export function createActionHandlerDecorator<RootState extends State = State, ModuleState extends {} = {}>(interceptor: HandlerInterceptor<RootState, ModuleState>): HandlerDecorator {
     return (target, propertyKey, descriptor) => {
         const fn = descriptor.value!;
-        descriptor.value = function*(...args: any[]): SagaIterator {
+        descriptor.value = function* (...args: any[]): SagaIterator {
             const boundFn: ActionHandlerWithMetaData = fn.bind(this, ...args) as any;
             // Do not use fn.actionName, it returns undefined
             // The reason is, fn is created before module register(), and the actionName had not been attached then
@@ -50,7 +50,7 @@ export function createActionHandlerDecorator<RootState extends State = State, Mo
 export function createRegularDecorator<S extends State = State>(interceptor: FunctionInterceptor<S>): VoidFunctionDecorator {
     return (target, propertyKey, descriptor) => {
         const fn = descriptor.value!;
-        descriptor.value = function(...args: any[]) {
+        descriptor.value = function (...args: any[]) {
             const rootState: S = app.store.getState() as S;
             const logger = app.logger;
             interceptor(fn.bind(this, ...args), rootState, logger);

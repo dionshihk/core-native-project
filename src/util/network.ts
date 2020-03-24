@@ -14,9 +14,8 @@
 import {APIException, NetworkConnectionException} from "../Exception";
 import {parseWithDate} from "./json-util";
 
-type HeaderMap = {[key: string]: string};
-type RequestHeaderInterceptor = (headers: HeaderMap) => void | Promise<void>;
-type ResponseHeaderInterceptor = (headers: Readonly<HeaderMap>) => void | Promise<void>;
+type RequestHeaderInterceptor = (headers: Headers) => void | Promise<void>;
+type ResponseHeaderInterceptor = (headers: Headers) => void | Promise<void>;
 
 const networkInterceptor: {request?: RequestHeaderInterceptor; response?: ResponseHeaderInterceptor} = {};
 
@@ -29,14 +28,14 @@ export function setResponseHeaderInterceptor(_: ResponseHeaderInterceptor) {
 }
 
 export async function ajax<TRequest, TResponse>(method: string, path: string, pathParams: object, request: TRequest): Promise<TResponse> {
-    // Replace {:param} in URL path
     let requestURL = urlParams(path, pathParams);
-    const requestHeaderMap: HeaderMap = {
+    const requestHeaders: Headers = new Headers({
         "Content-Type": "application/json",
         Accept: "application/json",
-    };
-    const requestParameters: RequestInit = {method, headers: requestHeaderMap};
+    });
+    await networkInterceptor.request?.(requestHeaders);
 
+    const requestParameters: RequestInit = {method, headers: requestHeaders};
     if (request) {
         if (method === "GET" || method === "DELETE") {
             requestURL += queryString(request);
@@ -45,18 +44,9 @@ export async function ajax<TRequest, TResponse>(method: string, path: string, pa
         }
     }
 
-    if (networkInterceptor.request) {
-        await networkInterceptor.request(requestHeaderMap);
-    }
-
-    // Send and handle AJAX
     try {
         const response = await fetch(requestURL, requestParameters);
-        if (networkInterceptor.response) {
-            const responseHeaderMap: HeaderMap = {};
-            response.headers.forEach((value: string, key: string) => (responseHeaderMap[key] = value));
-            await networkInterceptor.response(responseHeaderMap);
-        }
+        await networkInterceptor.response?.(response.headers);
 
         const responseText = await response.text();
         // API response may be void, in such case, JSON.parse will throw error
@@ -114,7 +104,7 @@ export function queryString(params: {[key: string]: any} | null | undefined): st
     return (
         "?" +
         entries
-            .filter(_ => _[1] !== null) // If some value is NULL, do not append to URL
+            .filter((_) => _[1] !== null) // If some value is NULL, do not append to URL
             .map(([key, value]) => {
                 const valueString = value instanceof Date ? value.toISOString() : encodeURIComponent(String(value));
                 return `${encodeURIComponent(key)}=${valueString}`;

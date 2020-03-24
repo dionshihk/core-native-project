@@ -36,7 +36,7 @@ export function register<M extends Module<any>>(module: M): ModuleProxy<M> {
 
     // Transform every method into ActionCreator
     const actions: any = {};
-    getKeys(module).forEach(actionType => {
+    getKeys(module).forEach((actionType) => {
         // Attach action name, for @Log / error handler reflection
         const method = module[actionType];
         const qualifiedActionType = `${moduleName}/${actionType}`;
