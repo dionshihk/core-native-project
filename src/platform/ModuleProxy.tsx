@@ -8,7 +8,7 @@ import {Module, ModuleLifecycleListener} from "./Module";
 
 type NavigationEventSubscription = {remove: () => void};
 
-export class ModuleProxy<M extends Module<any>> {
+export class ModuleProxy<M extends Module<any, any>> {
     constructor(private module: M, private actions: ActionCreators<M>) {}
 
     getActions(): ActionCreators<M> {

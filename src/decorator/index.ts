@@ -23,13 +23,13 @@ type VoidFunctionDecorator = (target: object, propertyKey: string, descriptor: T
 
 type ActionHandlerWithMetaData = ActionHandler & {actionName: string; maskedParams: string};
 
-type HandlerInterceptor<RootState extends State = State, ModuleState extends {} = {}> = (handler: ActionHandlerWithMetaData, thisModule: Module<ModuleState, {}, RootState>) => SagaIterator;
+type HandlerInterceptor<RootState extends State = State> = (handler: ActionHandlerWithMetaData, thisModule: Module<RootState, any>) => SagaIterator;
 type FunctionInterceptor<S> = (handler: () => void, rootState: Readonly<S>, logger: Logger) => void;
 
 /**
  * A helper for ActionHandler functions (Saga).
  */
-export function createActionHandlerDecorator<RootState extends State = State, ModuleState extends {} = {}>(interceptor: HandlerInterceptor<RootState, ModuleState>): HandlerDecorator {
+export function createActionHandlerDecorator<RootState extends State = State>(interceptor: HandlerInterceptor<RootState>): HandlerDecorator {
     return (target, propertyKey, descriptor) => {
         const fn = descriptor.value!;
         descriptor.value = function* (...args: any[]): SagaIterator {
