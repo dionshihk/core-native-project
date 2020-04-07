@@ -1,6 +1,6 @@
 {
   "name": "core-native",
-  "version": "1.8.4",
+  "version": "1.8.5",
   "main": "lib/index.js",
   "module": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -15,21 +15,21 @@
     "format": "prettier --config node/prettier.json --write \"{src,test}/**/*.{ts,tsx}\""
   },
   "devDependencies": {
-    "@types/jest": "25.1.4",
-    "@typescript-eslint/eslint-plugin": "2.26.0",
-    "@typescript-eslint/parser": "2.26.0",
-    "chalk": "3.0.0",
+    "@types/jest": "25.2.1",
+    "@typescript-eslint/eslint-plugin": "2.27.0",
+    "@typescript-eslint/parser": "2.27.0",
+    "chalk": "4.0.0",
     "eslint": "6.8.0",
     "eslint-config-prettier": "6.10.1",
     "fs-extra": "9.0.0",
-    "jest": "25.2.4",
-    "prettier": "2.0.2",
-    "ts-jest": "25.3.0",
+    "jest": "25.2.7",
+    "prettier": "2.0.4",
+    "ts-jest": "25.3.1",
     "typescript": "3.8.3",
     "yargs": "15.3.1"
   },
   "dependencies": {
-    "@types/node": "13.9.8",
+    "@types/node": "13.11.0",
     "@types/react": "*",
     "@types/react-native": "0.62.1",
     "@types/react-redux": "7.1.7",
@@ -40,7 +40,7 @@
     "tslib": "1.11.1"
   },
   "peerDependencies": {
-    "@types/node": "13.9.8",
+    "@types/node": "13.11.0",
     "@types/react": "*",
     "@types/react-native": "0.62.1",
     "@types/react-redux": "7.1.7",

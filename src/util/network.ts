@@ -27,13 +27,15 @@ export function setResponseHeaderInterceptor(_: ResponseHeaderInterceptor) {
     networkInterceptor.response = _;
 }
 
-export async function ajax<TRequest, TResponse>(method: string, path: string, pathParams: object, request: TRequest): Promise<TResponse> {
+export async function ajax<TRequest, TResponse>(method: string, path: string, pathParams: object, request: TRequest, skipInterceptor: boolean = false): Promise<TResponse> {
     let requestURL = urlParams(path, pathParams);
     const requestHeaders: Headers = new Headers({
         "Content-Type": "application/json",
         Accept: "application/json",
     });
-    await networkInterceptor.request?.(requestHeaders);
+    if (!skipInterceptor) {
+        await networkInterceptor.request?.(requestHeaders);
+    }
 
     const requestParameters: RequestInit = {method, headers: requestHeaders};
     if (request) {
@@ -46,7 +48,10 @@ export async function ajax<TRequest, TResponse>(method: string, path: string, pa
 
     try {
         const response = await fetch(requestURL, requestParameters);
-        await networkInterceptor.response?.(response.headers);
+
+        if (!skipInterceptor) {
+            await networkInterceptor.response?.(response.headers);
+        }
 
         const responseText = await response.text();
         // API response may be void, in such case, JSON.parse will throw error
