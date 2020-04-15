@@ -5,7 +5,7 @@ export {Module} from "./platform/Module";
 
 export {async} from "./util/async";
 export {ajax, uri, setResponseHeaderInterceptor, setRequestHeaderInterceptor} from "./util/network";
-export {default as ErrorBoundary} from "./util/ErrorBoundary";
+export {ErrorBoundary} from "./util/ErrorBoundary";
 
 export {createActionHandlerDecorator, createRegularDecorator, Loading, Interval, Mutex, RetryOnNetworkConnectionError, SilentOnNetworkConnectionError, TimeLimit, Lifecycle, Log} from "./decorator";
 export {Exception, APIException, NetworkConnectionException} from "./Exception";

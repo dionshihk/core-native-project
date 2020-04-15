@@ -11,19 +11,20 @@ export interface State {
 }
 
 // Redux Action
+const SET_STATE_ACTION = "@@framework/setState";
+
 export interface Action<P> extends ReduxAction<string> {
-    name?: string;
     payload: P;
+    name?: typeof SET_STATE_ACTION;
 }
 
 // Redux Action: SetState (to update state.app)
-const SET_STATE_ACTION = "@@framework/setState";
-
 interface SetStateActionPayload {
     module: string;
     state: any;
 }
 
+// state must be complete module state, not partial
 export function setStateAction(module: string, state: object, type: string): Action<SetStateActionPayload> {
     return {
         type,
@@ -36,7 +37,7 @@ function setStateReducer(state: State["app"] = {}, action: Action<any>): State["
     // Use action.name for set state action, make type specifiable to make tracking/tooling easier
     if (action.name === SET_STATE_ACTION) {
         const {module, state: moduleState} = action.payload as SetStateActionPayload;
-        return {...state, [module]: {...state[module], ...moduleState}};
+        return {...state, [module]: moduleState};
     }
     return state;
 }

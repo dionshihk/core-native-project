@@ -5,7 +5,7 @@ import {app} from "../app";
 import {LoggerConfig} from "../Logger";
 import {ErrorListener} from "../module";
 import {call, delay} from "redux-saga/effects";
-import ErrorBoundary from "../util/ErrorBoundary";
+import {ErrorBoundary} from "../util/ErrorBoundary";
 import {ajax} from "../util/network";
 import {Exception, NetworkConnectionException} from "../Exception";
 import {captureError} from "../util/error-util";
