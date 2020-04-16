@@ -1,6 +1,6 @@
 /**
  * Attention:
- * Do not use "axios" for network utils in React Native.
+ * Do NOT use "axios" for network utils in React Native.
  *
  * Explanation:
  * 1) Axios supports [nodejs-http] and [XHR] only, does not support [fetch] API.
