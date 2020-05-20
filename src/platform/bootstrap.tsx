@@ -1,10 +1,10 @@
-import React, {ComponentType} from "react";
+import React from "react";
 import {AppRegistry, AppState, AppStateStatus} from "react-native";
 import {Provider} from "react-redux";
 import {app} from "../app";
 import {LoggerConfig} from "../Logger";
 import {ErrorListener} from "../module";
-import {call, delay} from "redux-saga/effects";
+import {call, delay} from "../typed-saga";
 import {ErrorBoundary} from "../util/ErrorBoundary";
 import {ajax} from "../util/network";
 import {Exception, NetworkConnectionException} from "../Exception";
@@ -12,19 +12,26 @@ import {captureError} from "../util/error-util";
 
 interface BootstrapOption {
     registeredAppName: string;
-    componentType: ComponentType<{}>;
+    componentType: React.ComponentType;
     errorListener: ErrorListener;
     beforeRendering?: () => Promise<any>;
     logger?: LoggerConfig;
 }
 
+const LOGGER_ACTION = "@@framework/logger";
+
 export function startApp(config: BootstrapOption) {
-    renderApp(config.registeredAppName, config.componentType, config.beforeRendering);
     setupGlobalErrorHandler(config.errorListener);
-    setupLogger(config.logger);
+    runBackgroundLoop(config.logger);
+    renderRoot(config.registeredAppName, config.componentType, config.beforeRendering);
 }
 
-function renderApp(registeredAppName: string, EntryComponent: ComponentType<{}>, beforeRendering?: () => Promise<any>) {
+function setupGlobalErrorHandler(errorListener: ErrorListener) {
+    app.errorHandler = errorListener.onError.bind(errorListener);
+    ErrorUtils.setGlobalHandler((error, isFatal) => captureError(error, "@@framework/global", {severity: isFatal ? "fatal" : undefined}));
+}
+
+function renderRoot(registeredAppName: string, EntryComponent: React.ComponentType, beforeRendering?: () => Promise<any>) {
     class WrappedAppComponent extends React.PureComponent<{}, {initialized: boolean; appState: AppStateStatus}> {
         constructor(props: {}) {
             super(props);
@@ -68,37 +75,38 @@ function renderApp(registeredAppName: string, EntryComponent: ComponentType<{}>,
     AppRegistry.registerComponent(registeredAppName, () => WrappedAppComponent);
 }
 
-function setupGlobalErrorHandler(errorListener: ErrorListener) {
-    ErrorUtils.setGlobalHandler((error, isFatal) => captureError(error, "@@framework/global", {severity: isFatal ? "fatal" : undefined}));
-    app.errorHandler = errorListener.onError.bind(errorListener);
+function runBackgroundLoop(loggerConfig: LoggerConfig | undefined) {
+    app.logger.info("@@ENTER", {});
+    app.loggerConfig = loggerConfig || null;
+    app.sagaMiddleware.run(function* () {
+        while (true) {
+            // Loop on every 20 second
+            yield delay(20000);
+
+            // Send collected log to event server
+            if (loggerConfig) {
+                yield* call(sendEventLogs, loggerConfig);
+            }
+        }
+    });
 }
 
-function setupLogger(config: LoggerConfig | undefined) {
-    app.logger.info("@@ENTER", {});
-
-    if (config) {
-        app.loggerConfig = config;
-        app.sagaMiddleware.run(function* () {
-            while (true) {
-                yield delay(config.sendingFrequency * 1000);
-                try {
-                    const logs = app.logger.collect();
-                    if (logs.length > 0) {
-                        yield call(ajax, "POST", config.serverURL, {}, {events: logs}, true);
-                        app.logger.empty();
-                    }
-                } catch (e) {
-                    if (e instanceof NetworkConnectionException) {
-                        // Log this case and retry later
-                        app.logger.exception(e, {}, "@@framework/logger");
-                    } else if (e instanceof Exception) {
-                        // If not network error, retry always leads to same error, so have to give up
-                        const length = app.logger.collect().length;
-                        app.logger.empty();
-                        app.logger.exception(e, {droppedLogs: length.toString()}, "@@framework/logger");
-                    }
-                }
-            }
-        });
+async function sendEventLogs(config: LoggerConfig): Promise<void> {
+    try {
+        const logs = app.logger.collect();
+        if (logs.length > 0) {
+            await call(ajax, "POST", config.serverURL, {}, {events: logs}, true);
+            app.logger.empty();
+        }
+    } catch (e) {
+        if (e instanceof NetworkConnectionException) {
+            // Log this case and retry later
+            app.logger.exception(e, {}, LOGGER_ACTION);
+        } else if (e instanceof Exception) {
+            // If not network error, retry always leads to same error, so have to give up
+            const length = app.logger.collect().length;
+            app.logger.empty();
+            app.logger.exception(e, {droppedLogs: length.toString()}, LOGGER_ACTION);
+        }
     }
 }

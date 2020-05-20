@@ -23,15 +23,14 @@ interface ErrorLogEntry {
 }
 
 /**
- * If eventLogger config is provided in non-DEV environment
- * All collected logs will automatically sent to {serverURL} every {sendingFrequency} second
+ * If eventLogger config is provided in non-DEV environment.
+ * All collected logs will automatically sent to {serverURL} in a regular basis.
  *
- * The request will be PUT to the server in the following format
+ * The request will be PUT to the server in the following format:
  *      {events: Log[]}
  */
 export interface LoggerConfig {
     serverURL: string;
-    sendingFrequency: number;
     maskedKeywords?: RegExp[];
 }
 
@@ -41,7 +40,7 @@ export interface Logger {
     /**
      * Add a log item, whose result is OK
      */
-    info(action: string, info: {[key: string]: string}, elapsedTime?: number): void;
+    info(action: string, info: {[key: string]: string | undefined}, elapsedTime?: number): void;
 
     /**
      * Add a log item, whose result is WARN
@@ -68,7 +67,7 @@ export class LoggerImpl implements Logger {
         this.environmentContext = {...this.environmentContext, ...context};
     }
 
-    info(action: string, info: {[key: string]: string}, elapsedTime?: number): void {
+    info(action: string, info: {[key: string]: string | undefined}, elapsedTime?: number): void {
         this.appendLog("OK", {action, info, elapsedTime: elapsedTime || 0});
     }
 
