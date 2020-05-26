@@ -95,7 +95,7 @@ async function sendEventLogs(config: LoggerConfig): Promise<void> {
     try {
         const logs = app.logger.collect();
         if (logs.length > 0) {
-            await call(ajax, "POST", config.serverURL, {}, {events: logs}, true);
+            await ajax("POST", config.serverURL, {}, {events: logs}, true);
             app.logger.empty();
         }
     } catch (e) {
