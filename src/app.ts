@@ -44,7 +44,7 @@ function createApp(): App {
         yield takeEvery("*", function* (action: Action<any>) {
             const handler = app.actionHandlers[action.type];
             if (handler) {
-                // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                 // @ts-ignore
                 yield* executeAction(action.type, handler, ...action.payload);
             }

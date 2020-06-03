@@ -1,6 +1,8 @@
 import {Exception, JavaScriptException} from "../Exception";
 import {ErrorHandler} from "../module";
 import {app} from "../app";
+import {spawn} from "../typed-saga";
+import {sendEventLogs} from "../platform/bootstrap";
 
 interface ErrorExtra {
     severity?: "fatal";
@@ -40,6 +42,10 @@ export function captureError(error: any, action: string, extra: ErrorExtra = {})
 
 let isUserErrorHandlerRunning = false;
 export function* runUserErrorHandler(handler: ErrorHandler, exception: Exception) {
+    if (app.loggerConfig) {
+        // For app, report errors to event server ASAP, in case of sudden termination
+        yield spawn(sendEventLogs, app.loggerConfig.serverURL);
+    }
     if (isUserErrorHandlerRunning) return;
 
     try {

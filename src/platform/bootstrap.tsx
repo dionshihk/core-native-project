@@ -7,7 +7,7 @@ import {ErrorListener} from "../module";
 import {call, delay} from "../typed-saga";
 import {ErrorBoundary} from "../util/ErrorBoundary";
 import {ajax} from "../util/network";
-import {Exception, NetworkConnectionException} from "../Exception";
+import {APIException} from "../Exception";
 import {captureError} from "../util/error-util";
 
 interface BootstrapOption {
@@ -80,30 +80,27 @@ function runBackgroundLoop(loggerConfig: LoggerConfig | undefined) {
     app.loggerConfig = loggerConfig || null;
     app.sagaMiddleware.run(function* () {
         while (true) {
-            // Loop on every 20 second
-            yield delay(20000);
+            // Loop on every 30 second
+            yield delay(30000);
 
             // Send collected log to event server
             if (loggerConfig) {
-                yield* call(sendEventLogs, loggerConfig);
+                yield* call(sendEventLogs, loggerConfig.serverURL);
             }
         }
     });
 }
 
-async function sendEventLogs(config: LoggerConfig): Promise<void> {
+export async function sendEventLogs(serverURL: string): Promise<void> {
     try {
         const logs = app.logger.collect();
         if (logs.length > 0) {
-            await ajax("POST", config.serverURL, {}, {events: logs}, true);
+            await ajax("POST", serverURL, {}, {events: logs}, true);
             app.logger.empty();
         }
     } catch (e) {
-        if (e instanceof NetworkConnectionException) {
-            // Log this case and retry later
-            app.logger.exception(e, {}, LOGGER_ACTION);
-        } else if (e instanceof Exception) {
-            // If not network error, retry always leads to same error, so have to give up
+        if (e instanceof APIException) {
+            // For APIException, retry always leads to same error, so have to give up
             const length = app.logger.collect().length;
             app.logger.empty();
             app.logger.exception(e, {droppedLogs: length.toString()}, LOGGER_ACTION);

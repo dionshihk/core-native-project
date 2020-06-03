@@ -68,9 +68,9 @@ export async function ajax<TRequest, TResponse>(method: string, path: string, pa
             if (!errorId && (response.status === 502 || response.status === 504)) {
                 // Treat "cloud" error as Network Exception, e.g: gateway issue, load balancer unconnected to application server
                 // Note: Status 503 is maintenance
-                throw new NetworkConnectionException(`gateway error (${response.status})`, requestURL);
+                throw new NetworkConnectionException(`Gateway error (${response.status})`, requestURL);
             } else {
-                const errorMessage: string = responseData && responseData.message ? responseData.message : `[No response message]`;
+                const errorMessage: string = responseData && responseData.message ? responseData.message : `[No Response]`;
                 throw new APIException(errorMessage, response.status, requestURL, responseData, errorId, errorCode);
             }
         }
@@ -80,7 +80,7 @@ export async function ajax<TRequest, TResponse>(method: string, path: string, pa
             throw e;
         } else {
             console.warn("[framework] Network native exception", e);
-            throw new NetworkConnectionException(`failed to connect to ${requestURL}`, requestURL, e ? e.message : "-");
+            throw new NetworkConnectionException(`Failed to connect: ${requestURL}`, requestURL, e ? e.message : "-");
         }
     }
 }
