@@ -13,15 +13,22 @@ interface ErrorExtra {
 export function errorToException(error: any): Exception {
     if (error instanceof Exception) {
         return error;
-    } else if (error instanceof Error) {
-        return new JavaScriptException(error.message);
     } else {
-        try {
-            const errorMessage = JSON.stringify(error);
-            return new JavaScriptException(errorMessage);
-        } catch (e) {
-            return new JavaScriptException("[Unknown Error]");
+        let message: string;
+        if (!error) {
+            message = "[No Message]";
+        } else if (typeof error === "string") {
+            message = error;
+        } else if (error instanceof Error) {
+            message = error.message;
+        } else {
+            try {
+                message = JSON.stringify(error);
+            } catch (e) {
+                message = "[Unknown]";
+            }
         }
+        return new JavaScriptException(message);
     }
 }
 
