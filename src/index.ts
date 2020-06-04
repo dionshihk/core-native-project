@@ -1,6 +1,6 @@
 import "./debug";
 
-export {startApp} from "./platform/bootstrap";
+export {startApp, sendEventLogs} from "./platform/bootstrap";
 export {Module} from "./platform/Module";
 
 export {async} from "./util/async";

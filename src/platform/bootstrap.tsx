@@ -84,19 +84,20 @@ function runBackgroundLoop(loggerConfig: LoggerConfig | undefined) {
             yield delay(30000);
 
             // Send collected log to event server
-            if (loggerConfig) {
-                yield* call(sendEventLogs, loggerConfig.serverURL);
-            }
+            yield* call(sendEventLogs);
         }
     });
 }
 
-export async function sendEventLogs(serverURL: string): Promise<void> {
+export async function sendEventLogs(): Promise<void> {
     try {
-        const logs = app.logger.collect();
-        if (logs.length > 0) {
-            await ajax("POST", serverURL, {}, {events: logs}, true);
-            app.logger.empty();
+        const loggerConfig = app.loggerConfig;
+        if (loggerConfig) {
+            const logs = app.logger.collect();
+            if (logs.length > 0) {
+                await ajax("POST", loggerConfig.serverURL, {}, {events: logs}, true);
+                app.logger.empty();
+            }
         }
     } catch (e) {
         if (e instanceof APIException) {
