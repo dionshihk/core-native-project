@@ -6,8 +6,6 @@ import {app} from "../app";
 import {ActionCreators, executeAction} from "../module";
 import {Module, ModuleLifecycleListener} from "./Module";
 
-type NavigationEventSubscription = {remove: () => void};
-
 export class ModuleProxy<M extends Module<any, any>> {
     constructor(private module: M, private actions: ActionCreators<M>) {}
 
@@ -26,8 +24,8 @@ export class ModuleProxy<M extends Module<any, any>> {
             static navigationOptions = (ComponentType as any).navigationOptions;
 
             private lifecycleSagaTask: Task | null = null;
-            private focusSubscription: NavigationEventSubscription | undefined;
-            private blurSubscription: NavigationEventSubscription | undefined;
+            private unsubscribeFocus: (() => void) | undefined;
+            private unsubscribeBlur: (() => void) | undefined;
             private successTickCount: number = 0;
             private mountedTime: number = Date.now();
 
@@ -46,12 +44,14 @@ export class ModuleProxy<M extends Module<any, any>> {
                 const props: any = this.props;
                 if ("navigation" in props) {
                     const navigation = props.navigation;
-                    this.focusSubscription = navigation.addListener("didFocus", () => {
+                    // `focus` and `blur` in React Navigation 5.x are equivalent to `willFocus` and `willBlur` in React Navigation 4.x
+                    // https://reactnavigation.org/docs/upgrading-from-4.x/#navigation-events
+                    this.unsubscribeFocus = navigation.addListener("focus", () => {
                         if (lifecycleListener.onFocus.isLifecycle) {
                             app.store.dispatch(actions.onFocus());
                         }
                     });
-                    this.blurSubscription = navigation.addListener("willBlur", () => {
+                    this.unsubscribeBlur = navigation.addListener("blur", () => {
                         if (lifecycleListener.onBlur.isLifecycle) {
                             app.store.dispatch(actions.onBlur());
                         }
@@ -70,8 +70,8 @@ export class ModuleProxy<M extends Module<any, any>> {
                 });
 
                 this.lifecycleSagaTask?.cancel();
-                this.blurSubscription?.remove();
-                this.focusSubscription?.remove();
+                this.unsubscribeFocus?.();
+                this.unsubscribeBlur?.();
                 AppState.removeEventListener("change", this.onAppStateChange);
             }
 
