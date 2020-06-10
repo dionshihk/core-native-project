@@ -1,3 +1,6 @@
 node_modules
 node
 build
+
+**/*.config.js
+**/.*rc.js
