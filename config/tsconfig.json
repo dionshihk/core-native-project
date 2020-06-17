@@ -1,0 +1,22 @@
+{
+    "compilerOptions": {
+        "outDir": "../build/out",
+        "target": "es2015",
+        "module": "esnext",
+        "moduleResolution": "node",
+        "sourceMap": true,
+        "inlineSources": true,
+        "declaration": true,
+        "strict": true,
+        "allowSyntheticDefaultImports": true,
+        "esModuleInterop": true,
+        "importHelpers": true,
+        "jsx": "react-native",
+        "lib": ["es2017", "esnext"],
+        "experimentalDecorators": true,
+        "forceConsistentCasingInFileNames": true,
+        "suppressImplicitAnyIndexErrors": true,
+        "downlevelIteration": true
+    },
+    "include": ["../src", "../test"]
+}

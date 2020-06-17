@@ -15,14 +15,14 @@ interface BootstrapOption {
     componentType: React.ComponentType;
     errorListener: ErrorListener;
     beforeRendering?: () => Promise<any>;
-    logger?: LoggerConfig;
+    loggerConfig?: LoggerConfig;
 }
 
 const LOGGER_ACTION = "@@framework/logger";
 
 export function startApp(config: BootstrapOption) {
     setupGlobalErrorHandler(config.errorListener);
-    runBackgroundLoop(config.logger);
+    runBackgroundLoop(config.loggerConfig);
     renderRoot(config.registeredAppName, config.componentType, config.beforeRendering);
 }
 
