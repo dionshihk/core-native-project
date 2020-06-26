@@ -1,0 +1,12 @@
+# EditorConfig configuration: https://EditorConfig.org
+
+# Configuration for all file-types
+# Before adding rules, make sure they do not break other formatters / linters
+[*]
+charset = utf-8
+
+[*.{js,json,jsx,ts,tsx}]
+max_line_length = 300
+end_of_line = lf
+indent_style = space
+indent_size = 4
