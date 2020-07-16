@@ -9,7 +9,7 @@ if (process.env.NODE_ENV === "development") {
     enablePatches();
 }
 
-export interface ModuleLifecycleListener<RouteParam extends {} = {}> {
+export interface ModuleLifecycleListener<RouteParam extends object = object> {
     onEnter: ((routeParameters: RouteParam) => SagaIterator) & LifecycleDecoratorFlag;
     onDestroy: (() => SagaIterator) & LifecycleDecoratorFlag;
     onTick: (() => SagaIterator) & LifecycleDecoratorFlag & TickIntervalDecoratorFlag;
@@ -19,7 +19,7 @@ export interface ModuleLifecycleListener<RouteParam extends {} = {}> {
     onBlur: (() => SagaIterator) & LifecycleDecoratorFlag;
 }
 
-export class Module<RootState extends State, ModuleName extends keyof RootState["app"] & string, RouteParam extends {} = {}> implements ModuleLifecycleListener<RouteParam> {
+export class Module<RootState extends State, ModuleName extends keyof RootState["app"] & string, RouteParam extends object = object> implements ModuleLifecycleListener<RouteParam> {
     constructor(readonly name: ModuleName, readonly initialState: RootState["app"][ModuleName]) {}
 
     *onEnter(routeParameters: RouteParam): SagaIterator {
@@ -87,11 +87,12 @@ export class Module<RootState extends State, ModuleName extends keyof RootState[
             const originalState = this.state;
             const updater = stateOrUpdater as (state: RootState["app"][ModuleName]) => void;
             let patchDescriptions: string[] | undefined;
-            const newState = produce(
+            // TS cannot infer RootState["app"][ModuleName] as an object, so immer fails to unwrap the readonly type with Draft<T>
+            const newState = produce<Readonly<RootState["app"][ModuleName]>, RootState["app"][ModuleName]>(
                 originalState,
                 (draftState) => {
                     // Wrap into a void function, in case updater() might return anything
-                    updater(draftState as any);
+                    updater(draftState);
                 },
                 process.env.NODE_ENV === "development"
                     ? (patches) => {
