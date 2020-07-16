@@ -7,7 +7,7 @@ interface LoadingState {
 
 export interface State {
     loading: LoadingState;
-    app: {};
+    app: object;
 }
 
 // Redux Action
