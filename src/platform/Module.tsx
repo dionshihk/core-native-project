@@ -9,7 +9,7 @@ if (process.env.NODE_ENV === "development") {
     enablePatches();
 }
 
-export interface ModuleLifecycleListener<RouteParam extends {} = {}> {
+export interface ModuleLifecycleListener<RouteParam extends object = object> {
     onEnter: ((routeParameters: RouteParam) => SagaIterator) & LifecycleDecoratorFlag;
     onDestroy: (() => SagaIterator) & LifecycleDecoratorFlag;
     onTick: (() => SagaIterator) & LifecycleDecoratorFlag & TickIntervalDecoratorFlag;
@@ -19,7 +19,7 @@ export interface ModuleLifecycleListener<RouteParam extends {} = {}> {
     onBlur: (() => SagaIterator) & LifecycleDecoratorFlag;
 }
 
-export class Module<RootState extends State, ModuleName extends keyof RootState["app"] & string, RouteParam extends {} = {}> implements ModuleLifecycleListener<RouteParam> {
+export class Module<RootState extends State, ModuleName extends keyof RootState["app"] & string, RouteParam extends object = object> implements ModuleLifecycleListener<RouteParam> {
     constructor(readonly name: ModuleName, readonly initialState: RootState["app"][ModuleName]) {}
 
     *onEnter(routeParameters: RouteParam): SagaIterator {
