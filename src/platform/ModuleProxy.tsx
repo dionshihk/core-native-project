@@ -13,7 +13,7 @@ export class ModuleProxy<M extends Module<any, any>> {
         return this.actions;
     }
 
-    attachLifecycle<P extends {}>(ComponentType: React.ComponentType<P>): React.ComponentType<P> {
+    attachLifecycle<P extends object>(ComponentType: React.ComponentType<P>): React.ComponentType<P> {
         const moduleName = this.module.name;
         const lifecycleListener = this.module as ModuleLifecycleListener;
         const actions = this.actions as any;
