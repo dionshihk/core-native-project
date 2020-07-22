@@ -20,6 +20,8 @@ export interface ModuleLifecycleListener<RouteParam extends object = object> {
 }
 
 export class Module<RootState extends State, ModuleName extends keyof RootState["app"] & string, RouteParam extends object = object> implements ModuleLifecycleListener<RouteParam> {
+    private stateBuffer: Partial<RootState["app"][ModuleName]> = {};
+
     constructor(readonly name: ModuleName, readonly initialState: RootState["app"][ModuleName]) {}
 
     *onEnter(routeParameters: RouteParam): SagaIterator {
@@ -82,9 +84,9 @@ export class Module<RootState extends State, ModuleName extends keyof RootState[
         return app.logger;
     }
 
-    setState<K extends keyof RootState["app"][ModuleName]>(stateOrUpdater: ((state: RootState["app"][ModuleName]) => void) | Pick<RootState["app"][ModuleName], K> | RootState["app"][ModuleName]): void {
+    setState<K extends keyof RootState["app"][ModuleName]>(stateOrUpdater: ((state: RootState["app"][ModuleName]) => void) | Pick<RootState["app"][ModuleName], K> | RootState["app"][ModuleName], isDraft: boolean = false): void {
         if (typeof stateOrUpdater === "function") {
-            const originalState = this.state;
+            const originalState = {...this.state, ...this.stateBuffer};
             const updater = stateOrUpdater as (state: RootState["app"][ModuleName]) => void;
             let patchDescriptions: string[] | undefined;
             // TS cannot infer RootState["app"][ModuleName] as an object, so immer fails to unwrap the readonly type with Draft<T>
@@ -103,11 +105,16 @@ export class Module<RootState extends State, ModuleName extends keyof RootState[
             );
             if (newState !== originalState) {
                 const description = `@@${this.name}/setState${patchDescriptions ? `[${patchDescriptions.join("/")}]` : ``}`;
-                app.store.dispatch(setStateAction(this.name, newState, description));
+                if (isDraft) {
+                    this.stateBuffer = {...this.stateBuffer, ...newState};
+                } else {
+                    app.store.dispatch(setStateAction(this.name, newState, description));
+                    this.stateBuffer = {};
+                }
             }
         } else {
             const partialState = stateOrUpdater as object;
-            this.setState((state) => Object.assign(state, partialState));
+            this.setState((state) => Object.assign(state, partialState), isDraft);
         }
     }
 }
