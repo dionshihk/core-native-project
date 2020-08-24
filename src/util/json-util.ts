@@ -4,7 +4,15 @@
  * Function & Symbol are also discarded in the serialization.
  */
 export function stringifyWithMask(maskedKeywords: RegExp[], maskedOutput: string, ...args: any[]): string | undefined {
+    const seen = new WeakSet();
     const replacer = (key: string, value: any) => {
+        if (typeof value === "object" && value !== null) {
+            if (seen.has(value)) {
+                return undefined;
+            }
+            seen.add(value);
+        }
+
         if (typeof value === "function" || typeof value === "symbol") {
             return undefined;
         }
