@@ -1,7 +1,7 @@
 import {loggerContext} from "./platform/logger-context";
 import {errorToException} from "./util/error-util";
-import {APIException, Exception, JavaScriptException, NetworkConnectionException} from "./Exception";
 import {app} from "./app";
+import {APIException, Exception, JavaScriptException, NetworkConnectionException} from "./Exception";
 
 interface Log {
     date: Date;
@@ -31,6 +31,7 @@ interface ErrorLogEntry {
  */
 export interface LoggerConfig {
     serverURL: string;
+    performanceLogging?: boolean;
     maskedKeywords?: RegExp[];
 }
 
@@ -115,7 +116,6 @@ export class LoggerImpl implements Logger {
             errorCode = "JAVASCRIPT_ERROR";
         }
 
-        // isWarning = isWarning || !shouldAlertToUser(exception.message);
         this.appendLog(isWarning ? "WARN" : "ERROR", {action, errorCode, errorMessage: exception.message, info, elapsedTime: 0});
     }
 
@@ -137,9 +137,16 @@ export class LoggerImpl implements Logger {
                     completeContext[key] = value();
                 } catch (e) {
                     const message = errorToException(e).message;
-                    completeContext[key] = "[error] " + message;
+                    completeContext[key] = "ERR# " + message;
                     console.warn("[framework] Fail to execute logger context: " + message);
                 }
+            }
+        });
+
+        const trimmedInfo: {[key: string]: string} = {};
+        Object.entries(data.info).map(([key, value]) => {
+            if (value !== undefined) {
+                trimmedInfo[key] = value.substr(0, 1000);
             }
         });
 
@@ -148,7 +155,7 @@ export class LoggerImpl implements Logger {
             result,
             context: completeContext,
             action: data.action,
-            info: data.info,
+            info: trimmedInfo,
             errorCode: data.errorCode,
             errorMessage: data.errorMessage?.substr(0, 1000),
             elapsedTime: data.elapsedTime,
