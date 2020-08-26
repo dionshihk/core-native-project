@@ -90,21 +90,21 @@ function runBackgroundLoop(loggerConfig: LoggerConfig | undefined) {
 }
 
 export async function sendEventLogs(): Promise<void> {
-    try {
-        const loggerConfig = app.loggerConfig;
-        if (loggerConfig) {
-            const logs = app.logger.collect();
-            if (logs.length > 0) {
-                await ajax("POST", loggerConfig.serverURL, {}, {events: logs}, true);
-                app.logger.empty();
+    if (app.loggerConfig) {
+        const logs = app.logger.collect(200);
+        const logLength = logs.length;
+        if (logLength > 0) {
+            try {
+                await ajax("POST", app.loggerConfig.serverURL, {}, {events: logs}, true);
+                app.logger.emptyLastCollection();
+            } catch (e) {
+                if (e instanceof APIException) {
+                    // For APIException, retry always leads to same error, so have to give up
+                    // Do not log network exceptions
+                    app.logger.emptyLastCollection();
+                    app.logger.exception(e, {droppedLogs: logLength.toString()}, LOGGER_ACTION);
+                }
             }
-        }
-    } catch (e) {
-        if (e instanceof APIException) {
-            // For APIException, retry always leads to same error, so have to give up
-            const length = app.logger.collect().length;
-            app.logger.empty();
-            app.logger.exception(e, {droppedLogs: length.toString()}, LOGGER_ACTION);
         }
     }
 }
