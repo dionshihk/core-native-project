@@ -53,9 +53,9 @@ function renderRoot(registeredAppName: string, EntryComponent: React.ComponentTy
         onAppStateChange = (nextAppState: AppStateStatus) => {
             const {appState} = this.state;
             if (["inactive", "background"].includes(appState) && nextAppState === "active") {
-                app.logger.info("@@ACTIVE", {prevState: appState});
+                app.logger.info({action: "@@ACTIVE", info: {prevState: appState}});
             } else if (appState === "active" && ["inactive", "background"].includes(nextAppState)) {
-                app.logger.info("@@INACTIVE", {nextState: nextAppState});
+                app.logger.info({action: "@@INACTIVE", info: {nextState: nextAppState}});
             }
             this.setState({appState: nextAppState});
         };
@@ -76,12 +76,12 @@ function renderRoot(registeredAppName: string, EntryComponent: React.ComponentTy
 }
 
 function runBackgroundLoop(loggerConfig: LoggerConfig | undefined) {
-    app.logger.info("@@ENTER", {});
+    app.logger.info({action: "@@ENTER"});
     app.loggerConfig = loggerConfig || null;
     app.sagaMiddleware.run(function* () {
         while (true) {
-            // Loop on every 30 second
-            yield delay(30000);
+            // Loop on every 15 second
+            yield delay(15000);
 
             // Send collected log to event server
             yield* call(sendEventLogs);

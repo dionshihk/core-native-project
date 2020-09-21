@@ -15,5 +15,5 @@ function generateUniqueId() {
 }
 
 export const loggerContext = {
-    sessionId: generateUniqueId(),
+    session_id: generateUniqueId(),
 };

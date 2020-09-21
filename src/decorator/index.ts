@@ -13,7 +13,6 @@ export {Log} from "./Log";
 export {Mutex} from "./Mutex";
 export {RetryOnNetworkConnectionError} from "./RetryOnNetworkConnectionError";
 export {SilentOnNetworkConnectionError} from "./SilentOnNetworkConnectionError";
-export {TimeLimit} from "./TimeLimit";
 
 /**
  * Decorator type declaration, required by TypeScript.

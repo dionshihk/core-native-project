@@ -5,6 +5,7 @@ import {delay, call as rawCall} from "redux-saga/effects";
 import {app} from "../app";
 import {ActionCreators, executeAction} from "../module";
 import {Module, ModuleLifecycleListener} from "./Module";
+import {isErrorHandlingRunning} from "../util/error-util";
 
 export class ModuleProxy<M extends Module<any, any>> {
     constructor(private module: M, private actions: ActionCreators<M>) {}
@@ -64,12 +65,20 @@ export class ModuleProxy<M extends Module<any, any>> {
                     app.store.dispatch(actions.onDestroy());
                 }
 
-                app.logger.info(`${moduleName}/@@DESTROY`, {
-                    successTickCount: this.successTickCount.toString(),
-                    stayingSecond: ((Date.now() - this.mountedTime) / 1000).toFixed(2),
+                app.logger.info({
+                    action: `${moduleName}/@@DESTROY`,
+                    info: {
+                        success_tick: this.successTickCount.toString(),
+                        staying_second: ((Date.now() - this.mountedTime) / 1000).toFixed(2),
+                    },
                 });
 
-                this.lifecycleSagaTask?.cancel();
+                try {
+                    this.lifecycleSagaTask?.cancel();
+                } catch (e) {
+                    // In rare case, it may throw error, just ignore
+                }
+
                 this.unsubscribeFocus?.();
                 this.unsubscribeBlur?.();
                 AppState.removeEventListener("change", this.onAppStateChange);
@@ -121,9 +130,21 @@ export class ModuleProxy<M extends Module<any, any>> {
                     } else {
                         yield rawCall(executeAction, enterActionName, lifecycleListener.onEnter.bind(lifecycleListener), {});
                     }
-                    app.logger.info(enterActionName, {componentProps: JSON.stringify(props)}, Date.now() - startTime);
+
+                    app.logger.info({
+                        action: enterActionName,
+                        elapsedTime: Date.now() - startTime,
+                        info: {
+                            component_props: JSON.stringify(props),
+                        },
+                    });
                 } else {
-                    app.logger.info(enterActionName, {componentProps: JSON.stringify(props)});
+                    app.logger.info({
+                        action: enterActionName,
+                        info: {
+                            component_props: JSON.stringify(props),
+                        },
+                    });
                 }
 
                 if (lifecycleListener.onTick.isLifecycle) {
@@ -131,8 +152,10 @@ export class ModuleProxy<M extends Module<any, any>> {
                     const boundTicker = lifecycleListener.onTick.bind(lifecycleListener);
                     const tickActionName = `${moduleName}/@@TICK`;
                     while (true) {
-                        yield rawCall(executeAction, tickActionName, boundTicker);
-                        this.successTickCount++;
+                        if (!isErrorHandlingRunning()) {
+                            yield rawCall(executeAction, tickActionName, boundTicker);
+                            this.successTickCount++;
+                        }
                         yield delay(tickIntervalInMillisecond);
                     }
                 }
