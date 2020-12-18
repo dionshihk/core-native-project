@@ -12,5 +12,5 @@ export {Exception, APIException, NetworkConnectionException} from "./Exception";
 export {showLoading, loadingAction, State} from "./reducer";
 export {register, ErrorListener} from "./module";
 export {useLoadingStatus, useAction, useObjectKeyAction, useUnaryAction, useBinaryAction} from "./hooks";
-export {SagaIterator, call, put, spawn, delay, race, all} from "./typed-saga";
+export {SagaGenerator, call, put, spawn, delay, race, all} from "./typed-saga";
 export {logger} from "./app";

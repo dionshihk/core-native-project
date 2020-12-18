@@ -4,7 +4,7 @@ import {State} from "../reducer";
 import {app} from "../app";
 import {stringifyWithMask} from "../util/json-util";
 import {Logger} from "../Logger";
-import {SagaIterator} from "../typed-saga";
+import {SagaGenerator} from "../typed-saga";
 
 export {Interval} from "./Interval";
 export {Lifecycle} from "./Lifecycle";
@@ -22,7 +22,7 @@ type VoidFunctionDecorator = (target: object, propertyKey: string, descriptor: T
 
 type ActionHandlerWithMetaData = ActionHandler & {actionName: string; maskedParams: string};
 
-type HandlerInterceptor<RootState extends State = State> = (handler: ActionHandlerWithMetaData, thisModule: Module<RootState, any>) => SagaIterator;
+type HandlerInterceptor<RootState extends State = State> = (handler: ActionHandlerWithMetaData, thisModule: Module<RootState, any>) => SagaGenerator;
 type FunctionInterceptor<S> = (handler: () => void, rootState: Readonly<S>, logger: Logger) => void;
 
 /**
@@ -31,7 +31,7 @@ type FunctionInterceptor<S> = (handler: () => void, rootState: Readonly<S>, logg
 export function createActionHandlerDecorator<RootState extends State = State>(interceptor: HandlerInterceptor<RootState>): HandlerDecorator {
     return (target, propertyKey, descriptor) => {
         const fn = descriptor.value!;
-        descriptor.value = function* (...args: any[]): SagaIterator {
+        descriptor.value = function* (...args: any[]): SagaGenerator {
             const boundFn: ActionHandlerWithMetaData = fn.bind(this, ...args) as any;
             // Do not use fn.actionName, it returns undefined
             // The reason is, fn is created before module register(), and the actionName had not been attached then

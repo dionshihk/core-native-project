@@ -3,26 +3,26 @@ import {Logger} from "../Logger";
 import {produce, enablePatches} from "immer";
 import {LifecycleDecoratorFlag, TickIntervalDecoratorFlag} from "../module";
 import {setStateAction, State} from "../reducer";
-import {SagaIterator} from "../typed-saga";
+import {SagaGenerator} from "../typed-saga";
 
 if (process.env.NODE_ENV === "development") {
     enablePatches();
 }
 
 export interface ModuleLifecycleListener<RouteParam extends object = object> {
-    onEnter: ((routeParameters: RouteParam) => SagaIterator) & LifecycleDecoratorFlag;
-    onDestroy: (() => SagaIterator) & LifecycleDecoratorFlag;
-    onTick: (() => SagaIterator) & LifecycleDecoratorFlag & TickIntervalDecoratorFlag;
-    onAppActive: (() => SagaIterator) & LifecycleDecoratorFlag;
-    onAppInactive: (() => SagaIterator) & LifecycleDecoratorFlag;
-    onFocus: (() => SagaIterator) & LifecycleDecoratorFlag;
-    onBlur: (() => SagaIterator) & LifecycleDecoratorFlag;
+    onEnter: ((routeParameters: RouteParam) => SagaGenerator) & LifecycleDecoratorFlag;
+    onDestroy: (() => SagaGenerator) & LifecycleDecoratorFlag;
+    onTick: (() => SagaGenerator) & LifecycleDecoratorFlag & TickIntervalDecoratorFlag;
+    onAppActive: (() => SagaGenerator) & LifecycleDecoratorFlag;
+    onAppInactive: (() => SagaGenerator) & LifecycleDecoratorFlag;
+    onFocus: (() => SagaGenerator) & LifecycleDecoratorFlag;
+    onBlur: (() => SagaGenerator) & LifecycleDecoratorFlag;
 }
 
 export class Module<RootState extends State, ModuleName extends keyof RootState["app"] & string, RouteParam extends object = object> implements ModuleLifecycleListener<RouteParam> {
     constructor(readonly name: ModuleName, readonly initialState: RootState["app"][ModuleName]) {}
 
-    *onEnter(routeParameters: RouteParam): SagaIterator {
+    *onEnter(routeParameters: RouteParam): SagaGenerator {
         /**
          * Called when the attached component is mounted.
          * The routeParameters is auto specified if the component is connected to React Navigator.
@@ -30,13 +30,13 @@ export class Module<RootState extends State, ModuleName extends keyof RootState[
          */
     }
 
-    *onDestroy(): SagaIterator {
+    *onDestroy(): SagaGenerator {
         /**
          * Called when the attached component is going to unmount.
          */
     }
 
-    *onTick(): SagaIterator {
+    *onTick(): SagaGenerator {
         /**
          * Called periodically during the lifecycle of attached component.
          * Usually used together with @Interval decorator, to specify the period (in second).
@@ -44,27 +44,27 @@ export class Module<RootState extends State, ModuleName extends keyof RootState[
          */
     }
 
-    *onAppActive(): SagaIterator {
+    *onAppActive(): SagaGenerator {
         /**
          * Called when the app becomes active (foreground) from background task.
          * Usually used for fetching updated configuration.
          */
     }
 
-    *onAppInactive(): SagaIterator {
+    *onAppInactive(): SagaGenerator {
         /**
          * Called when the app becomes inactive (background) from foreground task.
          * Usually used for storing some data into storage.
          */
     }
 
-    *onFocus(): SagaIterator {
+    *onFocus(): SagaGenerator {
         /**
          * Called when the attached component is connected to React Navigator, and gets focused.
          */
     }
 
-    *onBlur(): SagaIterator {
+    *onBlur(): SagaGenerator {
         /**
          * Called when the attached component is connected to React Navigator, and gets blurred.
          */
