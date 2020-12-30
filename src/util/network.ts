@@ -14,6 +14,9 @@
 import {APIException, NetworkConnectionException} from "../Exception";
 import {parseWithDate} from "./json-util";
 
+type ExtractPathParams<T extends string> = string extends T ? {[key: string]: string} : T extends `${infer Start}:${infer Param}/${infer Rest}` ? {[k in Param | keyof ExtractPathParams<Rest>]: string} : T extends `${infer Start}:${infer Param}` ? {[k in Param]: string} : {};
+type Method = "get" | "GET" | "delete" | "DELETE" | "head" | "HEAD" | "options" | "OPTIONS" | "post" | "POST" | "put" | "PUT" | "patch" | "PATCH";
+
 type RequestHeaderInterceptor = (headers: Headers) => void | Promise<void>;
 type ResponseHeaderInterceptor = (headers: Headers) => void | Promise<void>;
 
@@ -27,7 +30,7 @@ export function setResponseHeaderInterceptor(_: ResponseHeaderInterceptor) {
     networkInterceptor.response = _;
 }
 
-export async function ajax<TRequest, TResponse>(method: string, path: string, pathParams: object, request: TRequest, skipInterceptor: boolean = false): Promise<TResponse> {
+export async function ajax<Request, Response, Path extends string>(method: Method, path: Path, pathParams: ExtractPathParams<Path>, request: Request, skipInterceptor: boolean = false): Promise<Response> {
     let requestURL = urlParams(path, pathParams);
     const requestHeaders: Headers = new Headers({
         "Content-Type": "application/json",
@@ -59,7 +62,7 @@ export async function ajax<TRequest, TResponse>(method: string, path: string, pa
 
         if (response.ok) {
             // HTTP Status 200
-            return responseData as TResponse;
+            return responseData as Response;
         } else {
             // Try to get server errorMessage from response
             const errorId: string | null = responseData && responseData.id ? responseData.id : null;
