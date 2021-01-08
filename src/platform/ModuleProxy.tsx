@@ -5,7 +5,6 @@ import {delay, call as rawCall} from "redux-saga/effects";
 import {app} from "../app";
 import {ActionCreators, executeAction} from "../module";
 import {Module, ModuleLifecycleListener} from "./Module";
-import {isErrorHandlingRunning} from "../util/error-util";
 
 export class ModuleProxy<M extends Module<any, any>> {
     constructor(private module: M, private actions: ActionCreators<M>) {}
@@ -27,7 +26,7 @@ export class ModuleProxy<M extends Module<any, any>> {
             private lifecycleSagaTask: Task | null = null;
             private unsubscribeFocus: (() => void) | undefined;
             private unsubscribeBlur: (() => void) | undefined;
-            private successTickCount: number = 0;
+            private tickCount: number = 0;
             private mountedTime: number = Date.now();
 
             constructor(props: P) {
@@ -68,7 +67,7 @@ export class ModuleProxy<M extends Module<any, any>> {
                 app.logger.info({
                     action: `${moduleName}/@@DESTROY`,
                     info: {
-                        success_tick: this.successTickCount.toString(),
+                        tick_count: this.tickCount.toString(),
                         staying_second: ((Date.now() - this.mountedTime) / 1000).toFixed(2),
                     },
                 });
@@ -152,10 +151,8 @@ export class ModuleProxy<M extends Module<any, any>> {
                     const boundTicker = lifecycleListener.onTick.bind(lifecycleListener);
                     const tickActionName = `${moduleName}/@@TICK`;
                     while (true) {
-                        if (!isErrorHandlingRunning()) {
-                            yield rawCall(executeAction, tickActionName, boundTicker);
-                            this.successTickCount++;
-                        }
+                        yield rawCall(executeAction, tickActionName, boundTicker);
+                        this.tickCount++;
                         yield delay(tickIntervalInMillisecond);
                     }
                 }
