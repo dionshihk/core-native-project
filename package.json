@@ -31,7 +31,7 @@
     },
     "dependencies": {
         "@types/react": "17.0.0",
-        "@types/react-native": "0.63.44",
+        "@types/react-native": "0.63.45",
         "@types/react-redux": "7.1.15",
         "immer": "8.0.0",
         "react": "17.0.1",
@@ -42,7 +42,7 @@
     },
     "peerDependencies": {
         "@types/react": "17.0.0",
-        "@types/react-native": "0.63.44",
+        "@types/react-native": "0.63.45",
         "@types/react-redux": "7.1.15",
         "immer": "8.0.0",
         "react": "17.0.1",
