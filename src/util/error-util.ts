@@ -41,7 +41,11 @@ export function captureError(error: unknown, action: string, extra: ErrorExtra =
 
     const exception = errorToException(error);
     const errorStacktrace = error instanceof Error ? error.stack : undefined;
-    const info = {...extra, stacktrace: errorStacktrace};
+    const info: {[key: string]: string | undefined} = {
+        payload: extra.actionPayload,
+        extra_stacktrace: extra.extraStacktrace,
+        stacktrace: errorStacktrace,
+    };
 
     app.logger.exception(exception, info, action);
     app.sagaMiddleware.run(runUserErrorHandler, app.errorHandler, exception);

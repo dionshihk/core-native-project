@@ -16,6 +16,7 @@
         "experimentalDecorators": true,
         "forceConsistentCasingInFileNames": true,
         "suppressImplicitAnyIndexErrors": true,
+        "skipLibCheck": true,
         "downlevelIteration": true
     },
     "include": ["../src", "../test"]
