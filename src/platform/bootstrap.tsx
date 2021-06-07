@@ -38,7 +38,7 @@ function renderRoot(registeredAppName: string, EntryComponent: React.ComponentTy
             this.state = {initialized: false, appState: AppState.currentState};
         }
 
-        async componentDidMount() {
+        override async componentDidMount() {
             if (beforeRendering) {
                 await beforeRendering();
             }
@@ -46,7 +46,7 @@ function renderRoot(registeredAppName: string, EntryComponent: React.ComponentTy
             AppState.addEventListener("change", this.onAppStateChange);
         }
 
-        componentWillUnmount() {
+        override componentWillUnmount() {
             AppState.removeEventListener("change", this.onAppStateChange);
         }
 
@@ -60,7 +60,7 @@ function renderRoot(registeredAppName: string, EntryComponent: React.ComponentTy
             this.setState({appState: nextAppState});
         };
 
-        render() {
+        override render() {
             return (
                 this.state.initialized && (
                     <Provider store={app.store}>

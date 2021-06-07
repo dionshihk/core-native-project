@@ -34,7 +34,7 @@ export class ModuleProxy<M extends Module<any, any>> {
                 this.state = {appState: AppState.currentState};
             }
 
-            componentDidMount() {
+            override componentDidMount() {
                 this.lifecycleSagaTask = app.sagaMiddleware.run(this.lifecycleSaga.bind(this));
 
                 // According to the document, this API may change soon
@@ -59,7 +59,7 @@ export class ModuleProxy<M extends Module<any, any>> {
                 }
             }
 
-            componentWillUnmount() {
+            override componentWillUnmount() {
                 if (lifecycleListener.onDestroy.isLifecycle) {
                     app.store.dispatch(actions.onDestroy());
                 }
@@ -97,7 +97,7 @@ export class ModuleProxy<M extends Module<any, any>> {
                 this.setState({appState: nextAppState});
             };
 
-            render() {
+            override render() {
                 return <ComponentType {...this.props} />;
             }
 

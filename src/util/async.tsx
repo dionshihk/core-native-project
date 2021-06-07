@@ -16,14 +16,14 @@ export function async<T>(componentLoader: () => React.ComponentType<T>, loadingC
             this.state = {Component: null};
         }
 
-        componentDidMount() {
+        override componentDidMount() {
             if (this.state.Component === null) {
                 const Component = componentLoader();
                 this.setState({Component});
             }
         }
 
-        render() {
+        override render() {
             const {Component} = this.state;
             return Component ? <Component {...this.props} /> : loadingComponent;
         }
