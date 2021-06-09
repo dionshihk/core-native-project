@@ -7,7 +7,6 @@ import {Logger} from "../Logger";
 import {SagaGenerator} from "../typed-saga";
 
 export {Interval} from "./Interval";
-export {Lifecycle} from "./Lifecycle";
 export {Loading} from "./Loading";
 export {Log} from "./Log";
 export {Mutex} from "./Mutex";

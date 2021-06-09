@@ -16,6 +16,7 @@ export class ModuleProxy<M extends Module<any, any>> {
     attachLifecycle<P extends object>(ComponentType: React.ComponentType<P>): React.ComponentType<P> {
         const moduleName = this.module.name;
         const lifecycleListener = this.module as ModuleLifecycleListener;
+        const modulePrototype = Object.getPrototypeOf(lifecycleListener);
         const actions = this.actions as any;
 
         return class extends React.PureComponent<P, {appState: AppStateStatus}> {
@@ -42,25 +43,22 @@ export class ModuleProxy<M extends Module<any, any>> {
                 AppState.addEventListener("change", this.onAppStateChange);
 
                 const props: any = this.props;
-                if ("navigation" in props) {
-                    const navigation = props.navigation;
-                    // `focus` and `blur` in React Navigation 5.x are equivalent to `willFocus` and `willBlur` in React Navigation 4.x
-                    // https://reactnavigation.org/docs/upgrading-from-4.x/#navigation-events
-                    this.unsubscribeFocus = navigation.addListener("focus", () => {
-                        if (lifecycleListener.onFocus.isLifecycle) {
+                if ("navigation" in props && typeof props.navigation.addListener === "function") {
+                    if (this.hasOwnLifecycle("onFocus")) {
+                        this.unsubscribeFocus = props.navigation.addListener("focus", () => {
                             app.store.dispatch(actions.onFocus());
-                        }
-                    });
-                    this.unsubscribeBlur = navigation.addListener("blur", () => {
-                        if (lifecycleListener.onBlur.isLifecycle) {
+                        });
+                    }
+                    if (this.hasOwnLifecycle("onBlur")) {
+                        this.unsubscribeBlur = props.navigation.addListener("blur", () => {
                             app.store.dispatch(actions.onBlur());
-                        }
-                    });
+                        });
+                    }
                 }
             }
 
             override componentWillUnmount() {
-                if (lifecycleListener.onDestroy.isLifecycle) {
+                if (this.hasOwnLifecycle("onDestroy")) {
                     app.store.dispatch(actions.onDestroy());
                 }
 
@@ -86,11 +84,11 @@ export class ModuleProxy<M extends Module<any, any>> {
             onAppStateChange = (nextAppState: AppStateStatus) => {
                 const {appState} = this.state;
                 if (["inactive", "background"].includes(appState) && nextAppState === "active") {
-                    if (lifecycleListener.onAppActive.isLifecycle) {
+                    if (this.hasOwnLifecycle("onAppActive")) {
                         app.store.dispatch(actions.onAppActive());
                     }
                 } else if (appState === "active" && ["inactive", "background"].includes(nextAppState)) {
-                    if (lifecycleListener.onAppInactive.isLifecycle) {
+                    if (this.hasOwnLifecycle("onAppInactive")) {
                         app.store.dispatch(actions.onAppInactive());
                     }
                 }
@@ -100,6 +98,10 @@ export class ModuleProxy<M extends Module<any, any>> {
             override render() {
                 return <ComponentType {...this.props} />;
             }
+
+            private hasOwnLifecycle = (methodName: keyof ModuleLifecycleListener): boolean => {
+                return Object.prototype.hasOwnProperty.call(modulePrototype, methodName);
+            };
 
             private *lifecycleSaga() {
                 /**
@@ -112,41 +114,22 @@ export class ModuleProxy<M extends Module<any, any>> {
                 const props: any = this.props;
 
                 const enterActionName = `${moduleName}/@@ENTER`;
-                if (lifecycleListener.onEnter.isLifecycle) {
-                    const startTime = Date.now();
-                    if ("navigation" in props) {
-                        /**
-                         * For react navigation < 5, use props.navigation.state.params.
-                         * For react navigation 5, use props.route.params.
-                         */
-                        let routeParams;
-                        if (typeof props.navigation.state === "object") {
-                            routeParams = props.navigation.state.params;
-                        } else {
-                            routeParams = props.route?.params;
-                        }
-                        yield rawCall(executeAction, enterActionName, lifecycleListener.onEnter.bind(lifecycleListener), routeParams || {});
-                    } else {
-                        yield rawCall(executeAction, enterActionName, lifecycleListener.onEnter.bind(lifecycleListener), {});
-                    }
-
-                    app.logger.info({
-                        action: enterActionName,
-                        elapsedTime: Date.now() - startTime,
-                        info: {
-                            component_props: JSON.stringify(props),
-                        },
-                    });
+                const startTime = Date.now();
+                if ("navigation" in props) {
+                    yield rawCall(executeAction, enterActionName, lifecycleListener.onEnter.bind(lifecycleListener), props.route?.params || {});
                 } else {
-                    app.logger.info({
-                        action: enterActionName,
-                        info: {
-                            component_props: JSON.stringify(props),
-                        },
-                    });
+                    yield rawCall(executeAction, enterActionName, lifecycleListener.onEnter.bind(lifecycleListener), {});
                 }
 
-                if (lifecycleListener.onTick.isLifecycle) {
+                app.logger.info({
+                    action: enterActionName,
+                    elapsedTime: Date.now() - startTime,
+                    info: {
+                        component_props: JSON.stringify(props),
+                    },
+                });
+
+                if (this.hasOwnLifecycle("onTick")) {
                     const tickIntervalInMillisecond = (lifecycleListener.onTick.tickInterval || 5) * 1000;
                     const boundTicker = lifecycleListener.onTick.bind(lifecycleListener);
                     const tickActionName = `${moduleName}/@@TICK`;

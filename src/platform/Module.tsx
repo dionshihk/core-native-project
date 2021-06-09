@@ -1,7 +1,7 @@
 import {app} from "../app";
 import {Logger} from "../Logger";
 import {produce, enablePatches} from "immer";
-import {LifecycleDecoratorFlag, TickIntervalDecoratorFlag} from "../module";
+import {TickIntervalDecoratorFlag} from "../module";
 import {setStateAction, State} from "../reducer";
 import {SagaGenerator} from "../typed-saga";
 
@@ -10,13 +10,13 @@ if (process.env.NODE_ENV === "development") {
 }
 
 export interface ModuleLifecycleListener<RouteParam extends object = object> {
-    onEnter: ((routeParameters: RouteParam) => SagaGenerator) & LifecycleDecoratorFlag;
-    onDestroy: (() => SagaGenerator) & LifecycleDecoratorFlag;
-    onTick: (() => SagaGenerator) & LifecycleDecoratorFlag & TickIntervalDecoratorFlag;
-    onAppActive: (() => SagaGenerator) & LifecycleDecoratorFlag;
-    onAppInactive: (() => SagaGenerator) & LifecycleDecoratorFlag;
-    onFocus: (() => SagaGenerator) & LifecycleDecoratorFlag;
-    onBlur: (() => SagaGenerator) & LifecycleDecoratorFlag;
+    onEnter: (routeParameters: RouteParam) => SagaGenerator;
+    onDestroy: () => SagaGenerator;
+    onTick: (() => SagaGenerator) & TickIntervalDecoratorFlag;
+    onAppActive: () => SagaGenerator;
+    onAppInactive: () => SagaGenerator;
+    onFocus: () => SagaGenerator;
+    onBlur: () => SagaGenerator;
 }
 
 export class Module<RootState extends State, ModuleName extends keyof RootState["app"] & string, RouteParam extends object = object> implements ModuleLifecycleListener<RouteParam> {
@@ -60,13 +60,15 @@ export class Module<RootState extends State, ModuleName extends keyof RootState[
 
     *onFocus(): SagaGenerator {
         /**
-         * Called when the attached component is connected to React Navigator, and gets focused.
+         * Called when the attached component is connected to navigator, and gets focused.
+         * React Navigation Required: 5.x
          */
     }
 
     *onBlur(): SagaGenerator {
         /**
-         * Called when the attached component is connected to React Navigator, and gets blurred.
+         * Called when the attached component is connected to navigator, and gets blurred.
+         * React Navigation Required: 5.x
          */
     }
 

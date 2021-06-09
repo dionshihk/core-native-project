@@ -7,7 +7,7 @@ export {async} from "./util/async";
 export {ajax, uri, setResponseHeaderInterceptor, setRequestHeaderInterceptor} from "./util/network";
 export {ErrorBoundary} from "./util/ErrorBoundary";
 
-export {createActionHandlerDecorator, createRegularDecorator, Loading, Interval, Mutex, RetryOnNetworkConnectionError, SilentOnNetworkConnectionError, Lifecycle, Log} from "./decorator";
+export {createActionHandlerDecorator, createRegularDecorator, Loading, Interval, Mutex, RetryOnNetworkConnectionError, SilentOnNetworkConnectionError, Log} from "./decorator";
 export {Exception, APIException, NetworkConnectionException} from "./Exception";
 export {showLoading, loadingAction, State} from "./reducer";
 export {register, ErrorListener} from "./module";
