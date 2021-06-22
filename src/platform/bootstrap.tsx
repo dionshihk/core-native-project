@@ -56,6 +56,7 @@ function renderRoot(registeredAppName: string, EntryComponent: React.ComponentTy
                 app.logger.info({action: "@@ACTIVE", info: {prevState: appState}});
             } else if (appState === "active" && ["inactive", "background"].includes(nextAppState)) {
                 app.logger.info({action: "@@INACTIVE", info: {nextState: nextAppState}});
+                sendEventLogs();
             }
             this.setState({appState: nextAppState});
         };
