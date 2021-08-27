@@ -28,7 +28,7 @@ export function startApp(config: BootstrapOption) {
 
 function setupGlobalErrorHandler(errorListener: ErrorListener) {
     app.errorHandler = errorListener.onError.bind(errorListener);
-    ErrorUtils.setGlobalHandler((error, isFatal) => captureError(error, "@@framework/global", {severity: isFatal ? "fatal" : undefined}));
+    ErrorUtils.setGlobalHandler((error, isFatal) => captureError(error, "@@framework/global", isFatal ? {severity: "fatal"} : undefined));
 }
 
 function renderRoot(registeredAppName: string, EntryComponent: React.ComponentType, beforeRendering?: () => Promise<any>) {

@@ -79,11 +79,10 @@ export async function ajax<Request, Response, Path extends string>(method: Metho
         }
     } catch (e) {
         // Only APIException, NetworkConnectionException can be thrown
-        if (e instanceof APIException) {
+        if (e instanceof APIException || e instanceof NetworkConnectionException) {
             throw e;
         } else {
-            console.warn("[framework] Network native exception", e);
-            throw new NetworkConnectionException(`Failed to connect: ${requestURL}`, requestURL, e ? e.message : "-");
+            throw new NetworkConnectionException(`Failed to connect: ${requestURL}`, requestURL, e instanceof Error ? e.message : "[Unknown]");
         }
     }
 }
