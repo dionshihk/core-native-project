@@ -17,6 +17,12 @@ import {parseWithDate} from "./json-util";
 export type PathParams<T extends string> = string extends T ? {[key: string]: string | number} : T extends `${infer Start}:${infer Param}/${infer Rest}` ? {[k in Param | keyof PathParams<Rest>]: string | number} : T extends `${infer Start}:${infer Param}` ? {[k in Param]: string | number} : {};
 export type Method = "get" | "GET" | "delete" | "DELETE" | "head" | "HEAD" | "options" | "OPTIONS" | "post" | "POST" | "put" | "PUT" | "patch" | "PATCH";
 
+export interface APIErrorResponse {
+    id?: string | null;
+    errorCode?: string | null;
+    message?: string | null;
+}
+
 type RequestHeaderInterceptor = (headers: Headers) => void | Promise<void>;
 type ResponseHeaderInterceptor = (headers: Headers) => void | Promise<void>;
 
@@ -65,8 +71,9 @@ export async function ajax<Request, Response, Path extends string>(method: Metho
             return responseData as Response;
         } else {
             // Try to get server errorMessage from response
-            const errorId: string | null = responseData && responseData.id ? responseData.id : null;
-            const errorCode: string | null = responseData && responseData.errorCode ? responseData.errorCode : null;
+            const apiErrorResponse = responseData as APIErrorResponse | undefined;
+            const errorId: string | null = apiErrorResponse?.id || null;
+            const errorCode: string | null = apiErrorResponse?.errorCode || null;
 
             if (!errorId && (response.status === 502 || response.status === 504)) {
                 // Treat "cloud" error as Network Exception, e.g: gateway issue, load balancer unconnected to application server
