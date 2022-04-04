@@ -1,5 +1,5 @@
 import React from "react";
-import {AppRegistry, AppState, AppStateStatus} from "react-native";
+import {AppRegistry, AppState, AppStateStatus, NativeEventSubscription} from "react-native";
 import {Provider} from "react-redux";
 import {app} from "../app";
 import {LoggerConfig} from "../Logger";
@@ -33,6 +33,8 @@ function setupGlobalErrorHandler(errorListener: ErrorListener) {
 
 function renderRoot(registeredAppName: string, EntryComponent: React.ComponentType, beforeRendering?: () => Promise<any>) {
     class WrappedAppComponent extends React.PureComponent<{}, {initialized: boolean; appState: AppStateStatus}> {
+        private appStateListener: NativeEventSubscription | undefined;
+
         constructor(props: {}) {
             super(props);
             this.state = {initialized: false, appState: AppState.currentState};
@@ -43,11 +45,11 @@ function renderRoot(registeredAppName: string, EntryComponent: React.ComponentTy
                 await beforeRendering();
             }
             this.setState({initialized: true});
-            AppState.addEventListener("change", this.onAppStateChange);
+            this.appStateListener = AppState.addEventListener("change", this.onAppStateChange);
         }
 
         override componentWillUnmount() {
-            AppState.removeEventListener("change", this.onAppStateChange);
+            this.appStateListener?.remove();
         }
 
         onAppStateChange = (nextAppState: AppStateStatus) => {
