@@ -1,5 +1,5 @@
 import {Exception, JavaScriptException} from "../Exception";
-import {ErrorHandler} from "../module";
+import {type ErrorHandler} from "../module";
 import {app} from "../app";
 import {spawn} from "../typed-saga";
 import {sendEventLogs} from "../platform/bootstrap";

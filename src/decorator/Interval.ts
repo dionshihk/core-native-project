@@ -1,4 +1,4 @@
-import {ActionHandler, TickIntervalDecoratorFlag} from "../module";
+import {type ActionHandler, type TickIntervalDecoratorFlag} from "../module";
 
 type OnTickHandlerDecorator = (target: object, propertyKey: "onTick", descriptor: TypedPropertyDescriptor<ActionHandler & TickIntervalDecoratorFlag>) => TypedPropertyDescriptor<ActionHandler>;
 

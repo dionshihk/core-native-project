@@ -14,7 +14,13 @@
 import {APIException, NetworkConnectionException} from "../Exception";
 import {parseWithDate} from "./json-util";
 
-export type PathParams<T extends string> = string extends T ? {[key: string]: string | number} : T extends `${infer Start}:${infer Param}/${infer Rest}` ? {[k in Param | keyof PathParams<Rest>]: string | number} : T extends `${infer Start}:${infer Param}` ? {[k in Param]: string | number} : {};
+export type PathParams<T extends string> = string extends T
+    ? {[key: string]: string | number}
+    : T extends `${infer Start}:${infer Param}/${infer Rest}`
+      ? {[k in Param | keyof PathParams<Rest>]: string | number}
+      : T extends `${infer Start}:${infer Param}`
+        ? {[k in Param]: string | number}
+        : {};
 export type Method = "get" | "GET" | "delete" | "DELETE" | "head" | "HEAD" | "options" | "OPTIONS" | "post" | "POST" | "put" | "PUT" | "patch" | "PATCH";
 
 export interface APIErrorResponse {
@@ -118,7 +124,7 @@ export function queryString(params: {[key: string]: any} | null | undefined): st
     return (
         "?" +
         entries
-            .filter((_) => _[1] !== null) // If some value is NULL, do not append to URL
+            .filter(_ => _[1] !== null) // If some value is NULL, do not append to URL
             .map(([key, value]) => {
                 const valueString = value instanceof Date ? value.toISOString() : encodeURIComponent(String(value));
                 return `${encodeURIComponent(key)}=${valueString}`;

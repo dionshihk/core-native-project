@@ -1,9 +1,9 @@
 import React from "react";
-import {AppRegistry, AppState, AppStateStatus, NativeEventSubscription} from "react-native";
+import {AppRegistry, AppState, type AppStateStatus, type NativeEventSubscription} from "react-native";
 import {Provider} from "react-redux";
 import {app} from "../app";
-import {LoggerConfig} from "../Logger";
-import {ErrorListener} from "../module";
+import {type LoggerConfig} from "../Logger";
+import {type ErrorListener} from "../module";
 import {call, delay} from "../typed-saga";
 import {ErrorBoundary} from "../util/ErrorBoundary";
 import {ajax} from "../util/network";

@@ -1,9 +1,9 @@
-import {applyMiddleware, compose, createStore, Store, StoreEnhancer} from "redux";
-import createSagaMiddleware, {SagaMiddleware} from "redux-saga";
+import {applyMiddleware, compose, createStore, type Store, type StoreEnhancer} from "redux";
+import createSagaMiddleware, {type SagaMiddleware} from "redux-saga";
 import {takeEvery} from "redux-saga/effects";
-import {LoggerImpl, LoggerConfig, Logger} from "./Logger";
-import {ActionHandler, ErrorHandler, executeAction} from "./module";
-import {Action, LOADING_ACTION, rootReducer, State} from "./reducer";
+import {LoggerImpl, type LoggerConfig, type Logger} from "./Logger";
+import {type ActionHandler, type ErrorHandler, executeAction} from "./module";
+import {type Action, LOADING_ACTION, rootReducer, type State} from "./reducer";
 import {captureError} from "./util/error-util";
 
 declare const window: any;

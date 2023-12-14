@@ -1,6 +1,6 @@
 {
     "name": "core-native",
-    "version": "2.8.0",
+    "version": "2.8.1",
     "main": "lib/index.js",
     "module": "lib/index.js",
     "types": "lib/index.d.ts",
@@ -11,8 +11,9 @@
     },
     "scripts": {
         "build": "node script/build.js",
-        "test": "jest --config config/jest.json",
-        "format": "prettier --config config/prettier.json --write \"{src,test,script,config}/**/*.{js,ts,tsx,json}\""
+        "test": "jest --config config/jest.config.js",
+        "format": "prettier --write \"{src,test,script,config}/**/*.{js,ts,tsx,json}\"",
+        "prepublishOnly": "node script/build.js --mode fast"
     },
     "devDependencies": {
         "@types/jest": "29.5.11",
@@ -40,7 +41,8 @@
     },
     "peerDependencies": {
         "react": ">=18.0.0",
-        "react-dom": ">=18.0.0"
+        "react-dom": ">=18.0.0",
+        "react-native": "*"
     },
     "engines": {
         "node": ">=18"

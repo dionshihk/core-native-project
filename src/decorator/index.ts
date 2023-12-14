@@ -1,10 +1,10 @@
-import {ActionHandler} from "../module";
+import {type ActionHandler} from "../module";
 import {Module} from "../platform/Module";
-import {State} from "../reducer";
+import {type State} from "../reducer";
 import {app} from "../app";
 import {stringifyWithMask} from "../util/json-util";
-import {Logger} from "../Logger";
-import {SagaGenerator} from "../typed-saga";
+import {type Logger} from "../Logger";
+import {type SagaGenerator} from "../typed-saga";
 
 export {Interval} from "./Interval";
 export {Loading} from "./Loading";

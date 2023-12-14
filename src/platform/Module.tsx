@@ -1,13 +1,11 @@
 import {app} from "../app";
-import {Logger} from "../Logger";
+import {type Logger} from "../Logger";
 import {produce, enablePatches} from "immer";
-import {TickIntervalDecoratorFlag} from "../module";
-import {setStateAction, State} from "../reducer";
-import {SagaGenerator} from "../typed-saga";
+import {type TickIntervalDecoratorFlag} from "../module";
+import {setStateAction, type State} from "../reducer";
+import {type SagaGenerator} from "../typed-saga";
 
-if (process.env.NODE_ENV === "development") {
-    enablePatches();
-}
+if (process.env.NODE_ENV === "development") enablePatches();
 
 export interface ModuleLifecycleListener<RouteParam extends object = object> {
     onEnter: (routeParameters: RouteParam) => SagaGenerator;
@@ -87,7 +85,9 @@ export class Module<RootState extends State, ModuleName extends keyof RootState[
         return app.logger;
     }
 
-    setState<K extends keyof RootState["app"][ModuleName]>(stateOrUpdater: ((state: RootState["app"][ModuleName]) => void) | Pick<RootState["app"][ModuleName], K> | RootState["app"][ModuleName]): void {
+    setState<K extends keyof RootState["app"][ModuleName]>(
+        stateOrUpdater: ((state: RootState["app"][ModuleName]) => void) | Pick<RootState["app"][ModuleName], K> | RootState["app"][ModuleName]
+    ): void {
         if (typeof stateOrUpdater === "function") {
             const originalState = this.state;
             const updater = stateOrUpdater as (state: RootState["app"][ModuleName]) => void;
@@ -95,14 +95,14 @@ export class Module<RootState extends State, ModuleName extends keyof RootState[
             // TS cannot infer RootState["app"][ModuleName] as an object, so immer fails to unwrap the readonly type with Draft<T>
             const newState = produce<Readonly<RootState["app"][ModuleName]>, RootState["app"][ModuleName]>(
                 originalState,
-                (draftState) => {
+                draftState => {
                     // Wrap into a void function, in case updater() might return anything
                     updater(draftState);
                 },
                 process.env.NODE_ENV === "development"
-                    ? (patches) => {
+                    ? patches => {
                           // No need to read "op", in will only be "replace"
-                          patchDescriptions = patches.map((_) => _.path.join("."));
+                          patchDescriptions = patches.map(_ => _.path.join("."));
                       }
                     : undefined
             );
@@ -112,7 +112,7 @@ export class Module<RootState extends State, ModuleName extends keyof RootState[
             }
         } else {
             const partialState = stateOrUpdater as object;
-            this.setState((state) => Object.assign(state, partialState));
+            this.setState(state => Object.assign(state, partialState));
         }
     }
 }

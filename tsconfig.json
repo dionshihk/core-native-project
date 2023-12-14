@@ -1,3 +1,15 @@
 {
-    "extends": "./config/tsconfig.json"
+    "extends": "./config/tsconfig.base.json",
+    "compilerOptions": {
+        "rootDir": "src",
+        "outDir": "lib",
+        "composite": true,
+        "declarationMap": true,
+        "moduleResolution": "Bundler",
+        "types": ["node"],
+        "jsx": "react-native",
+        "lib": ["es2017", "esnext"]
+    },
+    "include": ["src"],
+    "references": [{"path": "./test/tsconfig.json"}]
 }

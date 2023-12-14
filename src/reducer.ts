@@ -1,4 +1,4 @@
-import {Action as ReduxAction, combineReducers, Reducer} from "redux";
+import {type Action as ReduxAction, combineReducers, type Reducer} from "redux";
 
 // Redux State
 interface LoadingState {

@@ -9,10 +9,10 @@ export {ErrorBoundary} from "./util/ErrorBoundary";
 
 export {createActionHandlerDecorator, createRegularDecorator, Loading, Interval, Mutex, RetryOnNetworkConnectionError, SilentOnNetworkConnectionError, Log} from "./decorator";
 export {Exception, APIException, NetworkConnectionException} from "./Exception";
-export {showLoading, loadingAction, State} from "./reducer";
-export {register, ErrorListener} from "./module";
+export {showLoading, loadingAction, type State} from "./reducer";
+export {register, type ErrorListener} from "./module";
 export {useLoadingStatus, useAction, useObjectKeyAction, useUnaryAction, useBinaryAction} from "./hooks";
-export {SagaGenerator, call, put, spawn, delay, race, all} from "./typed-saga";
+export {call, put, spawn, delay, all, race, fork, type SagaGenerator} from "./typed-saga";
 export {logger} from "./app";
 
 export {useStore, useSelector, useDispatch} from "react-redux";
