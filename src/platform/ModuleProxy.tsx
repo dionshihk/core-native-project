@@ -7,7 +7,10 @@ import {ActionCreators, executeAction} from "../module";
 import {Module, ModuleLifecycleListener} from "./Module";
 
 export class ModuleProxy<M extends Module<any, any>> {
-    constructor(private module: M, private actions: ActionCreators<M>) {}
+    constructor(
+        private module: M,
+        private actions: ActionCreators<M>
+    ) {}
 
     getActions(): ActionCreators<M> {
         return this.actions;

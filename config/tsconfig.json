@@ -16,7 +16,6 @@
         "lib": ["es2017", "esnext"],
         "experimentalDecorators": true,
         "forceConsistentCasingInFileNames": true,
-        "suppressImplicitAnyIndexErrors": true,
         "skipLibCheck": true,
         "noImplicitOverride": true,
         "downlevelIteration": true

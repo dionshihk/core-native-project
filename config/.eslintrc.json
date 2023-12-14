@@ -28,7 +28,7 @@
                         "private-instance-field",
                         "public-abstract-field",
                         "protected-abstract-field",
-                        "private-abstract-field",
+                        "abstract-field",
                         "public-constructor",
                         "protected-constructor",
                         "private-constructor",
@@ -37,7 +37,7 @@
                         "private-instance-method",
                         "public-abstract-method",
                         "protected-abstract-method",
-                        "private-abstract-method"
+                        "abstract-method"
                     ],
                     "order": "as-written"
                 }

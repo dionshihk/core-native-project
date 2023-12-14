@@ -94,7 +94,7 @@ export async function ajax<Request, Response, Path extends string>(method: Metho
     }
 }
 
-export function uri<Request>(path: string, request: Request): string {
+export function uri<Request extends {[key: string]: any} | null | undefined>(path: string, request: Request): string {
     return path + queryString(request);
 }
 

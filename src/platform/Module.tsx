@@ -20,7 +20,10 @@ export interface ModuleLifecycleListener<RouteParam extends object = object> {
 }
 
 export class Module<RootState extends State, ModuleName extends keyof RootState["app"] & string, RouteParam extends object = object> implements ModuleLifecycleListener<RouteParam> {
-    constructor(readonly name: ModuleName, readonly initialState: RootState["app"][ModuleName]) {}
+    constructor(
+        readonly name: ModuleName,
+        readonly initialState: RootState["app"][ModuleName]
+    ) {}
 
     *onEnter(routeParameters: RouteParam): SagaGenerator {
         /**
